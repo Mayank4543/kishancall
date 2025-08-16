@@ -4,8 +4,8 @@ const { pipeline } = require("@xenova/transformers");
 
 // MongoDB connection URI from environment variables
 const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://mayankrathore9897:codemonk234@cluster0.gnop8w8.mongodb.net/mydb";
+  process.env.MONGODB_URI ;
+
 
 // Import the shared Document model
 const Document = require("./models/Document");

@@ -6,8 +6,8 @@ const path = require("path");
 
 // MongoDB connection URI from environment variables
 const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  "mongodb+srv://mayankrathore9897:codemonk234@cluster0.gnop8w8.mongodb.net/mydb";
+  process.env.MONGODB_URI;
+
 
 // Connect to MongoDB
 async function connectToMongoDB() {
