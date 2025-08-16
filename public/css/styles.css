@@ -1,0 +1,411 @@
+/* Custom CSS for Semantic Search Interface */
+
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-color: #4CAF50;
+    --error-color: #f44336;
+    --warning-color: #ff9800;
+    --info-color: #2196F3;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar {
+    background: var(--primary-gradient) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+    border-radius: 12px 12px 0 0 !important;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: var(--primary-gradient);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.file-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.file-upload-area:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f0f2ff 0%, #ffffff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.file-upload-area.dragover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e3f2fd 0%, #f0f2ff 100%);
+    transform: scale(1.02);
+}
+
+.log-container {
+    background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+    border-radius: 8px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    border: 1px solid #333;
+}
+
+.log-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-container::-webkit-scrollbar-track {
+    background: #2d2d2d;
+}
+
+.log-container::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 3px;
+}
+
+.log-success { color: var(--success-color); }
+.log-error { color: var(--error-color); }
+.log-warning { color: var(--warning-color); }
+.log-info { color: var(--info-color); }
+
+.search-result {
+    border-left: 4px solid #667eea;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 0 8px 8px 0;
+    transition: all 0.2s ease;
+    margin: 12px 0;
+}
+
+.search-result:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.similarity-score {
+    background: var(--primary-gradient);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card {
+    background: var(--primary-gradient);
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card i {
+    font-size: 1.5rem;
+    opacity: 0.8;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    background: var(--primary-gradient);
+    border-radius: 4px;
+}
+
+.quick-search {
+    border-radius: 20px;
+    font-size: 12px;
+    padding: 6px 12px;
+    transition: all 0.2s ease;
+}
+
+.quick-search:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.status-indicator {
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+
+.status-processing {
+    box-shadow: 0 0 8px rgba(255, 152, 0, 0.4);
+}
+
+.status-error {
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.4);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.badge {
+    font-weight: 500;
+    border-radius: 6px;
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-outline-secondary {
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-card h3 {
+        font-size: 2rem;
+    }
+    
+    .file-upload-area {
+        padding: 20px;
+    }
+    
+    .search-result {
+        margin: 8px 0;
+        padding: 12px;
+    }
+}
+
+/* Loading animations */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+    transition: all 0.2s ease;
+}
+
+button, .btn {
+    transition: all 0.3s ease;
+}
+
+/* Custom scrollbar for the entire page */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a6fd8;
+}
+
+/* API Documentation Styles */
+.nav-tabs {
+    border-bottom: 2px solid #667eea;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+    border-radius: 8px 8px 0 0;
+    margin-right: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background: linear-gradient(135deg, #f0f2ff 0%, #e3f2fd 100%);
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+.nav-tabs .nav-link.active {
+    background: var(--primary-gradient);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.accordion-button {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border: none;
+    font-weight: 500;
+    padding: 1rem 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+    background: var(--primary-gradient);
+    color: white;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+}
+
+.accordion-button::after {
+    transition: transform 0.3s ease;
+}
+
+.accordion-item {
+    border: 1px solid #dee2e6;
+    border-radius: 8px !important;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.accordion-body {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+}
+
+.bg-success { background-color: var(--success-color) !important; }
+.bg-warning { background-color: var(--warning-color) !important; }
+.bg-danger { background-color: var(--error-color) !important; }
+
+pre {
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+pre code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+.table th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-color: #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+.table-bordered {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f0f8ff 100%);
+    border-color: #2196F3;
+    color: #0d47a1;
+}
+
+/* Code syntax highlighting for JSON */
+.bg-dark code {
+    color: #f8f9fa;
+}
+
+/* Responsive improvements for API docs */
+@media (max-width: 768px) {
+    .nav-tabs .nav-link {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+    
+    .accordion-button {
+        padding: 0.75rem 1rem;
+        font-size: 14px;
+    }
+    
+    pre {
+        font-size: 12px;
+    }
+    
+    .table-responsive {
+        border-radius: 8px;
+    }
+}
+
+/* Enhanced button styles for API documentation */
+.btn-outline-primary {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.btn-outline-primary:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Progress container visibility */
+.progress-container {
+    display: none;
+    margin-top: 20px;
+}
+
+.progress-container.show {
+    display: block;
+}

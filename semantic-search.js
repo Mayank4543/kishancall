@@ -3,9 +3,7 @@ const mongoose = require("mongoose");
 const { pipeline } = require("@xenova/transformers");
 
 // MongoDB connection URI from environment variables
-const MONGODB_URI =
-  process.env.MONGODB_URI ;
-
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Import the shared Document model
 const Document = require("./models/Document");
@@ -74,10 +72,10 @@ async function generateEmbedding(text) {
   }
 
   const pipeline = await initializeEmbeddingPipeline();
-  
+
   // Generate embedding
   const result = await pipeline(text, { pooling: "mean", normalize: true });
-  
+
   // Convert to regular array
   const embedding = Array.from(result.data);
 
@@ -90,7 +88,8 @@ async function generateEmbedding(text) {
   queryEmbeddingCache.set(cacheKey, embedding);
 
   return embedding;
-}/**
+}
+/**
  * Calculate cosine similarity between two vectors (optimized version)
  */
 function cosineSimilarity(vectorA, vectorB) {
@@ -253,17 +252,17 @@ async function fastSemanticSearch(query, topK = 10, filters = {}) {
                 {
                   $multiply: [
                     { $arrayElemAt: ["$embedding", "$$this"] },
-                    { $arrayElemAt: [queryEmbedding, "$$this"] }
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      }
+                    { $arrayElemAt: [queryEmbedding, "$$this"] },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      },
     },
     { $sort: { similarity: -1 } },
-    { $limit: topK * 3 } // Get more results than needed for post-processing
+    { $limit: topK * 3 }, // Get more results than needed for post-processing
   ];
 
   const results = await Document.aggregate(pipeline);
@@ -305,8 +304,12 @@ async function fastSemanticSearch(query, topK = 10, filters = {}) {
   const totalTime = Date.now() - startTime;
 
   console.log(`✅ Returning top ${topResults.length} results`);
-  console.log(`🎯 Best match similarity: ${topResults[0]?.similarity.toFixed(4) || "N/A"}`);
-  console.log(`⚡ Fast search time: ${totalTime}ms (embedding: ${embeddingTime}ms, aggregation: ${aggregationTime}ms, processing: ${processTime}ms)`);
+  console.log(
+    `🎯 Best match similarity: ${topResults[0]?.similarity.toFixed(4) || "N/A"}`
+  );
+  console.log(
+    `⚡ Fast search time: ${totalTime}ms (embedding: ${embeddingTime}ms, aggregation: ${aggregationTime}ms, processing: ${processTime}ms)`
+  );
 
   return topResults;
 }
@@ -341,70 +344,80 @@ async function semanticSearch(query, topK = 10, filters = {}) {
         path: "embedding",
         queryVector: queryEmbedding,
         numCandidates: Math.max(topK * 20, 200), // Search more candidates for better results
-        limit: topK * 2 // Get extra results before filtering
-      }
+        limit: topK * 2, // Get extra results before filtering
+      },
     },
     {
       $addFields: {
-        similarity: { $meta: "vectorSearchScore" } // Get the similarity score
-      }
-    }
+        similarity: { $meta: "vectorSearchScore" }, // Get the similarity score
+      },
+    },
   ];
 
   // Add filters if provided
   if (Object.keys(filters).length > 0) {
     const matchStage = { $match: {} };
-    
-    Object.keys(filters).forEach(key => {
+
+    Object.keys(filters).forEach((key) => {
       if (filters[key]) {
-        matchStage.$match[key] = new RegExp(filters[key], 'i');
+        matchStage.$match[key] = new RegExp(filters[key], "i");
       }
     });
-    
+
     // Add match stage after vector search
     pipeline.push(matchStage);
   }
-  
+
   // Final limit and projection
   pipeline.push({ $limit: topK });
   pipeline.push({
     $project: {
-      embedding: 0 // Exclude embedding field from results to save bandwidth
-    }
+      embedding: 0, // Exclude embedding field from results to save bandwidth
+    },
   });
 
   try {
     const searchStartTime = Date.now();
-    
+
     // Execute the vector search
     const results = await Document.aggregate(pipeline);
-    
+
     const searchTime = Date.now() - searchStartTime;
     const totalTime = Date.now() - startTime;
-    
+
     console.log(`✅ Vector search completed in ${searchTime}ms`);
     console.log(`📊 Found ${results.length} results`);
-    console.log(`⏱️ Total time: ${totalTime}ms (embedding: ${embeddingTime}ms, search: ${searchTime}ms)`);
-    
+    console.log(
+      `⏱️ Total time: ${totalTime}ms (embedding: ${embeddingTime}ms, search: ${searchTime}ms)`
+    );
+
     if (results.length > 0) {
-      console.log(`🎯 Best match similarity: ${results[0]?.similarity?.toFixed(4) || 'N/A'}`);
+      console.log(
+        `🎯 Best match similarity: ${
+          results[0]?.similarity?.toFixed(4) || "N/A"
+        }`
+      );
     }
-    
+
     return results;
-    
   } catch (error) {
     console.error("❌ Vector search failed:", error.message);
-    
+
     // Check if it's a vector search specific error
-    if (error.message.includes('$vectorSearch') || error.message.includes('vector_index')) {
+    if (
+      error.message.includes("$vectorSearch") ||
+      error.message.includes("vector_index")
+    ) {
       console.log("🔧 Vector search index might not be properly configured.");
       console.log("📋 Please ensure:");
       console.log("   1. Atlas Search index 'vector_index' exists");
       console.log("   2. Index is configured for 'embedding' field");
-      console.log("   3. numDimensions matches your embedding size (384 for all-MiniLM-L6-v2)");
+      console.log(
+        "   3. numDimensions matches your embedding size (384 for all-MiniLM-L6-v2)"
+      );
       console.log("   4. similarity is set to 'cosine'");
     }
-    
+
     // Fallback to the old method if vector search fails
     console.log("🔄 Falling back to manual cosine similarity search...");
     return await semanticSearchFallback(query, topK, filters);
@@ -415,7 +428,9 @@ async function semanticSearch(query, topK = 10, filters = {}) {
  * Fallback semantic search using manual cosine similarity (slower but reliable)
  */
 async function semanticSearchFallback(query, topK = 10, filters = {}) {
-  console.log(`🔍 Performing fallback cosine similarity search for: "${query}"`);
+  console.log(
+    `🔍 Performing fallback cosine similarity search for: "${query}"`
+  );
   const startTime = Date.now();
 
   // Generate embedding for the query
@@ -433,7 +448,7 @@ async function semanticSearchFallback(query, topK = 10, filters = {}) {
 
   // Use a more efficient approach - limit the number of documents we process
   const maxDocuments = 10000; // Limit to first 10k documents for faster processing
-  
+
   const documents = await Document.find(mongoFilter, {
     _id: 1,
     StateName: 1,
@@ -445,10 +460,10 @@ async function semanticSearchFallback(query, topK = 10, filters = {}) {
     Crop: 1,
     Season: 1,
     CreatedOn: 1,
-    embedding: 1
+    embedding: 1,
   })
-  .lean()
-  .limit(maxDocuments);
+    .lean()
+    .limit(maxDocuments);
 
   console.log(`📊 Processing ${documents.length} documents with embeddings`);
 
@@ -483,7 +498,9 @@ async function semanticSearchFallback(query, topK = 10, filters = {}) {
   const totalTime = Date.now() - startTime;
   console.log(`✅ Fallback search completed in ${totalTime}ms`);
   console.log(`📊 Returning top ${topResults.length} results`);
-  console.log(`🎯 Best match similarity: ${topResults[0]?.similarity.toFixed(4) || "N/A"}`);
+  console.log(
+    `🎯 Best match similarity: ${topResults[0]?.similarity.toFixed(4) || "N/A"}`
+  );
 
   return topResults;
 }
