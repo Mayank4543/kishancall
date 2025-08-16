@@ -15,7 +15,7 @@ body {
 
 .navbar {
     background: var(--primary-gradient) !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .card {
@@ -94,10 +94,21 @@ body {
     border-radius: 3px;
 }
 
-.log-success { color: var(--success-color); }
-.log-error { color: var(--error-color); }
-.log-warning { color: var(--warning-color); }
-.log-info { color: var(--info-color); }
+.log-success {
+    color: var(--success-color);
+}
+
+.log-error {
+    color: var(--error-color);
+}
+
+.log-warning {
+    color: var(--warning-color);
+}
+
+.log-info {
+    color: var(--info-color);
+}
 
 .search-result {
     border-left: 4px solid #667eea;
@@ -215,11 +226,11 @@ body {
     .stats-card h3 {
         font-size: 2rem;
     }
-    
+
     .file-upload-area {
         padding: 20px;
     }
-    
+
     .search-result {
         margin: 8px 0;
         padding: 12px;
@@ -228,8 +239,15 @@ body {
 
 /* Loading animations */
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
 }
 
 .loading {
@@ -241,7 +259,8 @@ body {
     transition: all 0.2s ease;
 }
 
-button, .btn {
+button,
+.btn {
     transition: all 0.3s ease;
 }
 
@@ -329,9 +348,17 @@ button, .btn {
     border-radius: 4px;
 }
 
-.bg-success { background-color: var(--success-color) !important; }
-.bg-warning { background-color: var(--warning-color) !important; }
-.bg-danger { background-color: var(--error-color) !important; }
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--error-color) !important;
+}
 
 pre {
     border-radius: 8px;
@@ -372,16 +399,16 @@ pre code {
         font-size: 14px;
         padding: 8px 12px;
     }
-    
+
     .accordion-button {
         padding: 0.75rem 1rem;
         font-size: 14px;
     }
-    
+
     pre {
         font-size: 12px;
     }
-    
+
     .table-responsive {
         border-radius: 8px;
     }

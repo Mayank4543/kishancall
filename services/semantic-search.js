@@ -6,7 +6,7 @@ const { pipeline } = require("@xenova/transformers");
 const MONGODB_URI = process.env.MONGODB_URI;
 
 // Import the shared Document model
-const Document = require("./models/Document");
+const Document = require("../models/Document");
 
 // Global pipeline variable to store the loaded model
 let embeddingPipeline = null;

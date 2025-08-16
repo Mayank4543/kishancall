@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="/css/styles.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="navbar navbar-dark">
         <div class="container">
@@ -25,12 +27,14 @@
         <!-- Navigation Tabs -->
         <ul class="nav nav-tabs mb-4" id="main-tabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard"
+                    type="button" role="tab">
                     <i class="fas fa-tachometer-alt"></i> Dashboard
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="api-docs-tab" data-bs-toggle="tab" data-bs-target="#api-docs" type="button" role="tab">
+                <button class="nav-link" id="api-docs-tab" data-bs-toggle="tab" data-bs-target="#api-docs" type="button"
+                    role="tab">
                     <i class="fas fa-code"></i> API Documentation
                 </button>
             </li>
@@ -40,217 +44,225 @@
         <div class="tab-content" id="main-tab-content">
             <!-- Dashboard Tab -->
             <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
-                
-        <!-- System Status Row -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-database"></i></h5>
-                        <h3 id="total-docs">0</h3>
-                        <p class="card-text">Total Documents</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-brain"></i></h5>
-                        <h3 id="docs-with-embeddings">0</h3>
-                        <p class="card-text">With Embeddings</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-percentage"></i></h5>
-                        <h3 id="embedding-progress">0%</h3>
-                        <p class="card-text">Progress</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card stats-card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title"><i class="fas fa-clock"></i></h5>
-                        <h3 id="last-search-time">-</h3>
-                        <p class="card-text">Last Search (ms)</p>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <div class="row">
-            <!-- Left Column: CSV Upload & Embedding Generation -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-upload"></i> CSV Upload & Processing</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- File Upload Area -->
-                        <div class="file-upload-area" id="file-upload-area">
-                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                            <h5>Drop CSV file here or click to browse</h5>
-                            <p class="text-muted">Supports CSV files with agricultural data</p>
-                            <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
-                        </div>
-
-                        <!-- File Info -->
-                        <div id="file-info" style="display: none;" class="mt-3">
-                            <div class="alert alert-info">
-                                <strong>File Selected:</strong> <span id="file-name"></span><br>
-                                <strong>Size:</strong> <span id="file-size"></span>
+                <!-- System Status Row -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><i class="fas fa-database"></i></h5>
+                                <h3 id="total-docs">0</h3>
+                                <p class="card-text">Total Documents</p>
                             </div>
                         </div>
-
-                        <!-- Action Buttons -->
-                        <div class="d-grid gap-2 mt-3">
-                            <button class="btn btn-primary" id="upload-csv-btn" disabled>
-                                <i class="fas fa-upload"></i> Upload & Import CSV
-                            </button>
-                            <button class="btn btn-success" id="generate-embeddings-btn">
-                                <i class="fas fa-brain"></i> Generate Embeddings
-                            </button>
-                            <button class="btn btn-info" id="refresh-status-btn">
-                                <i class="fas fa-sync"></i> Refresh Status
-                            </button>
-                        </div>
-
-                        <!-- Progress Bar -->
-                        <div class="progress-container">
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     id="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><i class="fas fa-brain"></i></h5>
+                                <h3 id="docs-with-embeddings">0</h3>
+                                <p class="card-text">With Embeddings</p>
                             </div>
-                            <div class="text-center mt-2">
-                                <small id="progress-text">Processing...</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><i class="fas fa-percentage"></i></h5>
+                                <h3 id="embedding-progress">0%</h3>
+                                <p class="card-text">Progress</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h5 class="card-title"><i class="fas fa-clock"></i></h5>
+                                <h3 id="last-search-time">-</h3>
+                                <p class="card-text">Last Search (ms)</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Logs -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between">
-                        <h5><i class="fas fa-terminal"></i> System Logs</h5>
-                        <button class="btn btn-sm btn-outline-secondary" id="clear-logs-btn">
-                            <i class="fas fa-trash"></i> Clear
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="log-container" id="log-container">
-                            <div class="log-entry log-info">System ready. Upload a CSV file to get started.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column: Semantic Search -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-search"></i> Semantic Search</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Search Input -->
-                        <div class="mb-3">
-                            <label for="search-query" class="form-label">Search Query</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="search-query" 
-                                       placeholder="Enter your search query (e.g., 'Government Schemes', 'crop disease management')">
-                                <button class="btn btn-primary" id="search-btn">
-                                    <i class="fas fa-search"></i> Search
-                                </button>
+                <div class="row">
+                    <!-- Left Column: CSV Upload & Embedding Generation -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-upload"></i> CSV Upload & Processing</h5>
                             </div>
-                        </div>
-
-                        <!-- Search Options -->
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="search-limit" class="form-label">Results Limit</label>
-                                <select class="form-select" id="search-limit">
-                                    <option value="5">5 results</option>
-                                    <option value="10" selected>10 results</option>
-                                    <option value="20">20 results</option>
-                                    <option value="50">50 results</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="search-method" class="form-label">Search Method</label>
-                                <select class="form-select" id="search-method">
-                                    <option value="vector">Vector Search (Fast)</option>
-                                    <option value="fallback">Fallback Search (Reliable)</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Filters -->
-                        <div class="mb-3">
-                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" 
-                                    data-bs-target="#search-filters">
-                                <i class="fas fa-filter"></i> Advanced Filters
-                            </button>
-                        </div>
-
-                        <div class="collapse" id="search-filters">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="filter-state" class="form-label">State</label>
-                                    <input type="text" class="form-control" id="filter-state" placeholder="e.g., Maharashtra">
+                            <div class="card-body">
+                                <!-- File Upload Area -->
+                                <div class="file-upload-area" id="file-upload-area">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <h5>Drop CSV file here or click to browse</h5>
+                                    <p class="text-muted">Supports CSV files with agricultural data</p>
+                                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="filter-category" class="form-label">Category</label>
-                                    <input type="text" class="form-control" id="filter-category" placeholder="e.g., Crop">
+
+                                <!-- File Info -->
+                                <div id="file-info" style="display: none;" class="mt-3">
+                                    <div class="alert alert-info">
+                                        <strong>File Selected:</strong> <span id="file-name"></span><br>
+                                        <strong>Size:</strong> <span id="file-size"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-grid gap-2 mt-3">
+                                    <button class="btn btn-primary" id="upload-csv-btn" disabled>
+                                        <i class="fas fa-upload"></i> Upload & Import CSV
+                                    </button>
+                                    <button class="btn btn-success" id="generate-embeddings-btn">
+                                        <i class="fas fa-brain"></i> Generate Embeddings
+                                    </button>
+                                    <button class="btn btn-info" id="refresh-status-btn">
+                                        <i class="fas fa-sync"></i> Refresh Status
+                                    </button>
+                                </div>
+
+                                <!-- Progress Bar -->
+                                <div class="progress-container">
+                                    <div class="progress">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                            id="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-center mt-2">
+                                        <small id="progress-text">Processing...</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Quick Search Buttons -->
-                        <div class="mb-3">
-                            <h6>Quick Searches:</h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-outline-primary btn-sm quick-search" data-query="Government Schemes">
-                                    Government Schemes
+                        <!-- Logs -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <h5><i class="fas fa-terminal"></i> System Logs</h5>
+                                <button class="btn btn-sm btn-outline-secondary" id="clear-logs-btn">
+                                    <i class="fas fa-trash"></i> Clear
                                 </button>
-                                <button class="btn btn-outline-primary btn-sm quick-search" data-query="crop disease management">
-                                    Crop Disease
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm quick-search" data-query="fertilizer application">
-                                    Fertilizer
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm quick-search" data-query="pest control">
-                                    Pest Control
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm quick-search" data-query="irrigation techniques">
-                                    Irrigation
-                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="log-container" id="log-container">
+                                    <div class="log-entry log-info">System ready. Upload a CSV file to get started.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Semantic Search -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-search"></i> Semantic Search</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Search Input -->
+                                <div class="mb-3">
+                                    <label for="search-query" class="form-label">Search Query</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="search-query"
+                                            placeholder="Enter your search query (e.g., 'Government Schemes', 'crop disease management')">
+                                        <button class="btn btn-primary" id="search-btn">
+                                            <i class="fas fa-search"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Search Options -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="search-limit" class="form-label">Results Limit</label>
+                                        <select class="form-select" id="search-limit">
+                                            <option value="5">5 results</option>
+                                            <option value="10" selected>10 results</option>
+                                            <option value="20">20 results</option>
+                                            <option value="50">50 results</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="search-method" class="form-label">Search Method</label>
+                                        <select class="form-select" id="search-method">
+                                            <option value="vector">Vector Search (Fast)</option>
+                                            <option value="fallback">Fallback Search (Reliable)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Filters -->
+                                <div class="mb-3">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#search-filters">
+                                        <i class="fas fa-filter"></i> Advanced Filters
+                                    </button>
+                                </div>
+
+                                <div class="collapse" id="search-filters">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="filter-state" class="form-label">State</label>
+                                            <input type="text" class="form-control" id="filter-state"
+                                                placeholder="e.g., Maharashtra">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="filter-category" class="form-label">Category</label>
+                                            <input type="text" class="form-control" id="filter-category"
+                                                placeholder="e.g., Crop">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Search Buttons -->
+                                <div class="mb-3">
+                                    <h6>Quick Searches:</h6>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-outline-primary btn-sm quick-search"
+                                            data-query="Government Schemes">
+                                            Government Schemes
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm quick-search"
+                                            data-query="crop disease management">
+                                            Crop Disease
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm quick-search"
+                                            data-query="fertilizer application">
+                                            Fertilizer
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm quick-search"
+                                            data-query="pest control">
+                                            Pest Control
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm quick-search"
+                                            data-query="irrigation techniques">
+                                            Irrigation
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Search Results -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <h5><i class="fas fa-list"></i> Search Results</h5>
+                                <span id="results-count" class="badge bg-primary">0 results</span>
+                            </div>
+                            <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                                <div id="search-results">
+                                    <div class="text-center text-muted p-4">
+                                        <i class="fas fa-search fa-3x mb-3"></i>
+                                        <p>Enter a search query to see results</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Search Results -->
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between">
-                        <h5><i class="fas fa-list"></i> Search Results</h5>
-                        <span id="results-count" class="badge bg-primary">0 results</span>
-                    </div>
-                    <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
-                        <div id="search-results">
-                            <div class="text-center text-muted p-4">
-                                <i class="fas fa-search fa-3x mb-3"></i>
-                                <p>Enter a search query to see results</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-            
             </div> <!-- End Dashboard Tab -->
-            
+
             <!-- API Documentation Tab -->
             <div class="tab-pane fade" id="api-docs" role="tabpanel">
                 <div class="row">
@@ -258,10 +270,11 @@
                         <div class="card">
                             <div class="card-header">
                                 <h4><i class="fas fa-book"></i> API Documentation</h4>
-                                <p class="mb-0 text-muted">Complete API reference for the Semantic Search CSV Manager</p>
+                                <p class="mb-0 text-muted">Complete API reference for the Semantic Search CSV Manager
+                                </p>
                             </div>
                             <div class="card-body">
-                                
+
                                 <!-- Base URL -->
                                 <div class="mb-4">
                                     <h5><i class="fas fa-server"></i> Base URL</h5>
@@ -272,24 +285,26 @@
 
                                 <!-- Endpoints -->
                                 <div class="accordion" id="api-accordion">
-                                    
+
                                     <!-- Health Check -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#health-check">
+                                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                                data-bs-target="#health-check">
                                                 <span class="badge bg-success me-2">GET</span>
                                                 <strong>/ - Health Check</strong>
                                             </button>
                                         </h2>
-                                        <div id="health-check" class="accordion-collapse collapse show" data-bs-parent="#api-accordion">
+                                        <div id="health-check" class="accordion-collapse collapse show"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
                                                 <p>Returns server status and available endpoints.</p>
-                                                
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
                                                     <code>GET /</code>
                                                 </div>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "message": "🚀 Semantic Search CSV Manager is running!",
@@ -310,20 +325,23 @@
                                     <!-- System Status -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#system-status">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#system-status">
                                                 <span class="badge bg-success me-2">GET</span>
                                                 <strong>/api/status - System Status</strong>
                                             </button>
                                         </h2>
-                                        <div id="system-status" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
+                                        <div id="system-status" class="accordion-collapse collapse"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
-                                                <p>Get detailed system status including database stats and embedding progress.</p>
-                                                
+                                                <p>Get detailed system status including database stats and embedding
+                                                    progress.</p>
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
                                                     <code>GET /api/status</code>
                                                 </div>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "status": "healthy",
@@ -343,22 +361,25 @@
                                     <!-- CSV Upload -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#csv-upload">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#csv-upload">
                                                 <span class="badge bg-warning me-2">POST</span>
                                                 <strong>/api/upload-csv - Upload CSV File</strong>
                                             </button>
                                         </h2>
-                                        <div id="csv-upload" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
+                                        <div id="csv-upload" class="accordion-collapse collapse"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
                                                 <p>Upload and process a CSV file containing agricultural data.</p>
-                                                
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
                                                     <strong>Method:</strong> <code>POST /api/upload-csv</code><br>
                                                     <strong>Content-Type:</strong> <code>multipart/form-data</code><br>
-                                                    <strong>Body:</strong> Form data with file field named <code>csvFile</code>
+                                                    <strong>Body:</strong> Form data with file field named
+                                                    <code>csvFile</code>
                                                 </div>
-                                                
+
                                                 <h6>Expected CSV Headers</h6>
                                                 <div class="table-responsive mb-3">
                                                     <table class="table table-sm table-bordered">
@@ -370,23 +391,75 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <tr><td>StateName</td><td>String</td><td>Name of the state</td></tr>
-                                                            <tr><td>DistrictName</td><td>String</td><td>Name of the district</td></tr>
-                                                            <tr><td>BlockName</td><td>String</td><td>Name of the block</td></tr>
-                                                            <tr><td>Season</td><td>String</td><td>Agricultural season</td></tr>
-                                                            <tr><td>Sector</td><td>String</td><td>Agricultural sector</td></tr>
-                                                            <tr><td>Category</td><td>String</td><td>Query category</td></tr>
-                                                            <tr><td>Crop</td><td>String</td><td>Crop name</td></tr>
-                                                            <tr><td>QueryType</td><td>String</td><td>Type of query</td></tr>
-                                                            <tr><td>QueryText</td><td>String</td><td>The actual query text</td></tr>
-                                                            <tr><td>KccAns</td><td>String</td><td>Answer/response text</td></tr>
-                                                            <tr><td>CreatedOn</td><td>Date</td><td>Creation date</td></tr>
-                                                            <tr><td>year</td><td>Number</td><td>Year</td></tr>
-                                                            <tr><td>month</td><td>Number</td><td>Month</td></tr>
+                                                            <tr>
+                                                                <td>StateName</td>
+                                                                <td>String</td>
+                                                                <td>Name of the state</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>DistrictName</td>
+                                                                <td>String</td>
+                                                                <td>Name of the district</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>BlockName</td>
+                                                                <td>String</td>
+                                                                <td>Name of the block</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Season</td>
+                                                                <td>String</td>
+                                                                <td>Agricultural season</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Sector</td>
+                                                                <td>String</td>
+                                                                <td>Agricultural sector</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Category</td>
+                                                                <td>String</td>
+                                                                <td>Query category</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Crop</td>
+                                                                <td>String</td>
+                                                                <td>Crop name</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>QueryType</td>
+                                                                <td>String</td>
+                                                                <td>Type of query</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>QueryText</td>
+                                                                <td>String</td>
+                                                                <td>The actual query text</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>KccAns</td>
+                                                                <td>String</td>
+                                                                <td>Answer/response text</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>CreatedOn</td>
+                                                                <td>Date</td>
+                                                                <td>Creation date</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>year</td>
+                                                                <td>Number</td>
+                                                                <td>Year</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>month</td>
+                                                                <td>Number</td>
+                                                                <td>Month</td>
+                                                            </tr>
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Success Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "success": true,
@@ -394,7 +467,7 @@
   "totalProcessed": 49999,
   "totalInserted": 49999
 }</code></pre>
-                                                
+
                                                 <h6><i class="fas fa-exclamation-triangle"></i> Error Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "error": "CSV upload failed",
@@ -407,21 +480,24 @@
                                     <!-- Semantic Search -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#semantic-search">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#semantic-search">
                                                 <span class="badge bg-warning me-2">POST</span>
                                                 <strong>/api/search - Semantic Search (Vector)</strong>
                                             </button>
                                         </h2>
-                                        <div id="semantic-search" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
+                                        <div id="semantic-search" class="accordion-collapse collapse"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
-                                                <p>Perform semantic search using MongoDB Atlas vector search for fast results.</p>
-                                                
+                                                <p>Perform semantic search using MongoDB Atlas vector search for fast
+                                                    results.</p>
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
                                                     <strong>Method:</strong> <code>POST /api/search</code><br>
                                                     <strong>Content-Type:</strong> <code>application/json</code>
                                                 </div>
-                                                
+
                                                 <h6>Request Body Schema</h6>
                                                 <pre class="bg-dark text-light p-3 rounded mb-3"><code>{
   "query": "string (required)",     // Search query text
@@ -434,7 +510,7 @@
     "Crop": "string"
   }
 }</code></pre>
-                                                
+
                                                 <h6>Example Request</h6>
                                                 <pre class="bg-dark text-light p-3 rounded mb-3"><code>{
   "query": "Government schemes for farmers",
@@ -444,7 +520,7 @@
     "Category": "Government Schemes"
   }
 }</code></pre>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Success Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "success": true,
@@ -476,24 +552,28 @@
                                     <!-- Fallback Search -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#fallback-search">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#fallback-search">
                                                 <span class="badge bg-warning me-2">POST</span>
                                                 <strong>/api/search-fallback - Fallback Search</strong>
                                             </button>
                                         </h2>
-                                        <div id="fallback-search" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
+                                        <div id="fallback-search" class="accordion-collapse collapse"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
-                                                <p>Perform semantic search using manual cosine similarity calculation for reliable results when vector search is unavailable.</p>
-                                                
+                                                <p>Perform semantic search using manual cosine similarity calculation
+                                                    for reliable results when vector search is unavailable.</p>
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
                                                     <strong>Method:</strong> <code>POST /api/search-fallback</code><br>
                                                     <strong>Content-Type:</strong> <code>application/json</code><br>
                                                     <strong>Body:</strong> Same as <code>/api/search</code>
                                                 </div>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Response</h6>
-                                                <p>Same format as <code>/api/search</code> but may take longer to process.</p>
+                                                <p>Same format as <code>/api/search</code> but may take longer to
+                                                    process.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -501,32 +581,37 @@
                                     <!-- Generate Embeddings -->
                                     <div class="accordion-item">
                                         <h2 class="accordion-header">
-                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#generate-embeddings">
+                                            <button class="accordion-button collapsed" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#generate-embeddings">
                                                 <span class="badge bg-warning me-2">POST</span>
                                                 <strong>/api/generate-embeddings - Generate Embeddings</strong>
                                             </button>
                                         </h2>
-                                        <div id="generate-embeddings" class="accordion-collapse collapse" data-bs-parent="#api-accordion">
+                                        <div id="generate-embeddings" class="accordion-collapse collapse"
+                                            data-bs-parent="#api-accordion">
                                             <div class="accordion-body">
-                                                <p>Start the asynchronous process of generating embeddings for all documents in the database.</p>
-                                                
+                                                <p>Start the asynchronous process of generating embeddings for all
+                                                    documents in the database.</p>
+
                                                 <h6><i class="fas fa-arrow-up"></i> Request</h6>
                                                 <div class="bg-light p-3 rounded mb-3">
-                                                    <strong>Method:</strong> <code>POST /api/generate-embeddings</code><br>
+                                                    <strong>Method:</strong>
+                                                    <code>POST /api/generate-embeddings</code><br>
                                                     <strong>Content-Type:</strong> <code>application/json</code><br>
                                                     <strong>Body:</strong> Empty or <code>{}</code>
                                                 </div>
-                                                
+
                                                 <h6><i class="fas fa-arrow-down"></i> Response</h6>
                                                 <pre class="bg-dark text-light p-3 rounded"><code>{
   "success": true,
   "message": "Embedding generation started. Check /api/status for progress.",
   "note": "This is an asynchronous process that may take several minutes."
 }</code></pre>
-                                                
+
                                                 <div class="alert alert-info">
                                                     <i class="fas fa-info-circle"></i>
-                                                    <strong>Note:</strong> This process runs in the background. Monitor progress using the <code>/api/status</code> endpoint.
+                                                    <strong>Note:</strong> This process runs in the background. Monitor
+                                                    progress using the <code>/api/status</code> endpoint.
                                                 </div>
                                             </div>
                                         </div>
@@ -580,7 +665,8 @@
                                             <li><strong>Search Requests:</strong> No rate limit (local server)</li>
                                             <li><strong>Vector Search:</strong> ~50-200ms response time</li>
                                             <li><strong>Fallback Search:</strong> ~500-2000ms response time</li>
-                                            <li><strong>Embedding Generation:</strong> ~1-5 minutes for 50k documents</li>
+                                            <li><strong>Embedding Generation:</strong> ~1-5 minutes for 50k documents
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
@@ -588,7 +674,7 @@
                                 <!-- Examples -->
                                 <div class="mt-4">
                                     <h5><i class="fas fa-code"></i> cURL Examples</h5>
-                                    
+
                                     <h6>Search Request</h6>
                                     <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST http://localhost:8080/api/search \
   -H "Content-Type: application/json" \
@@ -600,10 +686,11 @@
       "Category": "Disease Management"
     }
   }'</code></pre>
-                                    
+
                                     <h6>Status Check</h6>
-                                    <pre class="bg-dark text-light p-3 rounded"><code>curl -X GET http://localhost:8080/api/status</code></pre>
-                                    
+                                    <pre
+                                        class="bg-dark text-light p-3 rounded"><code>curl -X GET http://localhost:8080/api/status</code></pre>
+
                                     <h6>Generate Embeddings</h6>
                                     <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST http://localhost:8080/api/generate-embeddings \
   -H "Content-Type: application/json" \
@@ -619,8 +706,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Custom JavaScript -->
     <script src="/js/app.js"></script>
 </body>
+
 </html>

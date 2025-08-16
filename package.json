@@ -6,11 +6,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "import-csv": "node import-csv.js",
-    "setup-search": "node semantic-search.js",
-    "test-search": "node test-search.js",
-    "benchmark": "node test-search.js --benchmark",
-    "performance-test": "node performance-test.js",
     "generate-embeddings": "node -e \"require('./semantic-search').generateEmbeddingsForAllDocuments().then(() => process.exit(0))\""
   },
   "dependencies": {
