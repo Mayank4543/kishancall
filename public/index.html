@@ -111,15 +111,237 @@
 
                                 <!-- Action Buttons -->
                                 <div class="d-grid gap-2 mt-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="process-background" checked>
+                                        <label class="form-check-label" for="process-background">
+                                            Process in background
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="clear-existing">
+                                        <label class="form-check-label" for="clear-existing">
+                                            Clear existing documents
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="generate-embeddings" checked>
+                                        <label class="form-check-label" for="generate-embeddings">
+                                            Auto-generate embeddings
+                                        </label>
+                                    </div>
                                     <button class="btn btn-primary" id="upload-csv-btn" disabled>
                                         <i class="fas fa-upload"></i> Upload & Import CSV
                                     </button>
                                     <button class="btn btn-success" id="generate-embeddings-btn">
-                                        <i class="fas fa-brain"></i> Generate Embeddings
+                                        <i class="fas fa-brain"></i> Generate Embeddings (Legacy)
                                     </button>
                                     <button class="btn btn-info" id="refresh-status-btn">
                                         <i class="fas fa-sync"></i> Refresh Status
                                     </button>
+                                </div>
+
+                                <!-- CSV Queue Manager -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6><i class="fas fa-list"></i> CSV Processing Queue</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Queue Status -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <small><strong>Queue Status:</strong></small>
+                                                <div class="badge bg-secondary" id="csv-queue-status">Idle</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small><strong>Queue Length:</strong></small>
+                                                <span id="csv-queue-length">0</span> files
+                                            </div>
+                                        </div>
+
+                                        <!-- Queue Controls -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-success btn-sm" id="csv-queue-start-btn">
+                                                        <i class="fas fa-play"></i> Start Queue
+                                                    </button>
+                                                    <button class="btn btn-warning btn-sm" id="csv-queue-stop-btn">
+                                                        <i class="fas fa-stop"></i> Stop Queue
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-info btn-sm" id="csv-queue-refresh-btn">
+                                                        <i class="fas fa-sync"></i> Refresh Queue
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm" id="csv-queue-clear-btn">
+                                                        <i class="fas fa-trash"></i> Clear Queue
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Current Task -->
+                                        <div id="csv-current-task" style="display: none;" class="mb-3">
+                                            <h6>Current Task</h6>
+                                            <div class="card card-body">
+                                                <div class="row">
+                                                    <div class="col-md-8">
+                                                        <strong>File:</strong> <span id="csv-current-file">-</span><br>
+                                                        <strong>Status:</strong> <span id="csv-current-status">-</span><br>
+                                                        <strong>Progress:</strong> <span id="csv-current-progress">0%</span>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <small>Processed: <span id="csv-current-processed">0</span></small><br>
+                                                        <small>Inserted: <span id="csv-current-inserted">0</span></small><br>
+                                                        <small>Failed: <span id="csv-current-failed">0</span></small>
+                                                    </div>
+                                                </div>
+                                                <div class="progress mt-2" style="height: 10px;">
+                                                    <div class="progress-bar" id="csv-current-progress-bar" role="progressbar" style="width: 0%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Queue List -->
+                                        <div id="csv-queue-list">
+                                            <h6>Queue (Empty)</h6>
+                                            <div class="text-muted text-center p-3">
+                                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                                <p>No CSV files in queue</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Background Embedding Controls -->
+                                <div class="card mt-3">
+                                    <div class="card-header">
+                                        <h6><i class="fas fa-cog"></i> Background Embedding Manager</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- Control Buttons -->
+                                        <div class="row mb-3">
+                                            <div class="col-md-4">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-info" id="bg-safety-check-btn">
+                                                        <i class="fas fa-shield-alt"></i> Safety Check
+                                                    </button>
+                                                    <button class="btn btn-success" id="bg-start-btn">
+                                                        <i class="fas fa-play"></i> Start
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-warning" id="bg-pause-btn" disabled>
+                                                        <i class="fas fa-pause"></i> Pause
+                                                    </button>
+                                                    <button class="btn btn-info" id="bg-resume-btn" disabled>
+                                                        <i class="fas fa-play"></i> Resume
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="d-grid gap-2">
+                                                    <button class="btn btn-danger" id="bg-stop-btn" disabled>
+                                                        <i class="fas fa-stop"></i> Stop
+                                                    </button>
+                                                    <button class="btn btn-secondary" id="bg-reset-btn" disabled>
+                                                        <i class="fas fa-redo"></i> Reset
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status Display -->
+                                        <div class="mb-3">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small><strong>Status:</strong></small>
+                                                    <div class="badge bg-secondary" id="bg-status">Not Running</div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small><strong>Progress:</strong></small>
+                                                    <div id="bg-progress">0%</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress Bar -->
+                                        <div class="progress mb-3" style="height: 20px;">
+                                            <div class="progress-bar progress-bar-striped" id="bg-progress-bar"
+                                                role="progressbar" style="width: 0%"></div>
+                                        </div>
+
+                                        <!-- Configuration -->
+                                        <div class="collapse" id="bg-config">
+                                            <div class="card card-body">
+                                                <h6>Configuration</h6>
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label for="bg-batch-size" class="form-label">Batch Size</label>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            id="bg-batch-size" value="50" min="1" max="1000">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="bg-delay" class="form-label">Delay (ms)</label>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            id="bg-delay" value="100" min="0" max="5000">
+                                                    </div>
+                                                </div>
+                                                <div class="row mt-2">
+                                                    <div class="col-md-6">
+                                                        <label for="bg-retry" class="form-label">Retry Attempts</label>
+                                                        <input type="number" class="form-control form-control-sm"
+                                                            id="bg-retry" value="3" min="0" max="10">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="bg-priority" class="form-label">Priority</label>
+                                                        <select class="form-select form-select-sm" id="bg-priority">
+                                                            <option value="low">Low</option>
+                                                            <option value="normal" selected>Normal</option>
+                                                            <option value="high">High</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-primary" id="bg-apply-config">
+                                                        <i class="fas fa-check"></i> Apply Configuration
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Toggle Configuration -->
+                                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#bg-config">
+                                            <i class="fas fa-cog"></i> Configuration
+                                        </button>
+
+                                        <!-- View Logs -->
+                                        <button class="btn btn-outline-info btn-sm" id="bg-view-logs">
+                                            <i class="fas fa-list"></i> View Logs
+                                        </button>
+
+                                        <!-- Status Details -->
+                                        <div class="mt-3" id="bg-status-details" style="display: none;">
+                                            <h6>Details</h6>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <small>Processed: <span id="bg-processed">0</span></small><br>
+                                                    <small>Success: <span id="bg-success">0</span></small><br>
+                                                    <small>Failed: <span id="bg-failed">0</span></small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <small>Elapsed: <span id="bg-elapsed">0s</span></small><br>
+                                                    <small>ETA: <span id="bg-eta">N/A</span></small><br>
+                                                    <small>Batch: <span id="bg-batch">0</span></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Progress Bar -->
@@ -699,6 +921,78 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Logs Modal -->
+    <div class="modal fade" id="bg-logs-modal" tabindex="-1" aria-labelledby="bg-logs-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bg-logs-modal-label">
+                        <i class="fas fa-terminal"></i> Background Embedding Logs
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Log Controls -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="log-level-filter" class="form-label">Filter by Level</label>
+                            <select class="form-select form-select-sm" id="log-level-filter">
+                                <option value="">All Levels</option>
+                                <option value="info">Info</option>
+                                <option value="success">Success</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                                <option value="debug">Debug</option>
+                                <option value="progress">Progress</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="log-limit" class="form-label">Number of Logs</label>
+                            <select class="form-select form-select-sm" id="log-limit">
+                                <option value="50">50 entries</option>
+                                <option value="100" selected>100 entries</option>
+                                <option value="200">200 entries</option>
+                                <option value="500">500 entries</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button class="btn btn-sm btn-primary me-2" id="refresh-logs-btn">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button class="btn btn-sm btn-warning me-2" id="clear-bg-logs-btn">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="auto-refresh-logs">
+                                <label class="form-check-label" for="auto-refresh-logs">
+                                    Auto-refresh
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs Container -->
+                    <div class="bg-dark text-light p-3 rounded"
+                        style="height: 400px; overflow-y: auto; font-family: monospace;">
+                        <div id="bg-logs-content">Loading logs...</div>
+                    </div>
+
+                    <!-- Log Statistics -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <small class="text-muted">
+                                <span id="log-stats">Logs will be displayed here...</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

@@ -35,6 +35,18 @@ try {
   console.error("❌ Failed to load semantic search module:", error.message);
 }
 
+// Import background embedding service
+let backgroundEmbeddingService;
+try {
+  backgroundEmbeddingService = require("./services/background-embedding-service");
+  console.log("✅ Background embedding service loaded");
+} catch (error) {
+  console.error(
+    "❌ Failed to load background embedding service:",
+    error.message
+  );
+}
+
 /**
  * Initialize the system on server startup
  */
@@ -99,6 +111,23 @@ app.get("/", (req, res) => {
       search: "POST /api/search",
       searchFallback: "POST /api/search-fallback",
       generateEmbeddings: "POST /api/generate-embeddings",
+      backgroundEmbeddings: {
+        start: "POST /api/background-embeddings/start",
+        pause: "POST /api/background-embeddings/pause",
+        resume: "POST /api/background-embeddings/resume",
+        stop: "POST /api/background-embeddings/stop",
+        status: "GET /api/background-embeddings/status",
+        safetyCheck: "GET /api/background-embeddings/safety-check",
+        logs: "GET /api/background-embeddings/logs",
+        config: "POST /api/background-embeddings/config",
+        reset: "POST /api/background-embeddings/reset",
+      },
+      csvQueue: {
+        status: "GET /api/csv-queue/status",
+        clear: "POST /api/csv-queue/clear",
+        stop: "POST /api/csv-queue/stop",
+        start: "POST /api/csv-queue/start",
+      },
       status: "GET /api/status",
     },
   });
@@ -115,6 +144,15 @@ app.get("/api/status", async (req, res) => {
       embedding: { $exists: true, $ne: [] },
     });
 
+    // Get background embedding service status
+    let backgroundStatus = null;
+    let csvQueueStatus = null;
+    
+    if (backgroundEmbeddingService) {
+      backgroundStatus = backgroundEmbeddingService.getStatus();
+      csvQueueStatus = backgroundEmbeddingService.getCsvQueueStatus();
+    }
+
     res.json({
       status: "healthy",
       database: {
@@ -129,6 +167,8 @@ app.get("/api/status", async (req, res) => {
       },
       embeddingsReady: isEmbeddingsReady,
       isInitializing,
+      backgroundEmbedding: backgroundStatus,
+      csvQueue: csvQueueStatus,
     });
   } catch (error) {
     res.status(500).json({
@@ -139,7 +179,7 @@ app.get("/api/status", async (req, res) => {
 });
 
 /**
- * CSV Upload endpoint
+ * Enhanced CSV Upload endpoint with background processing option
  */
 app.post("/api/upload-csv", upload.single("csvFile"), async (req, res) => {
   try {
@@ -150,120 +190,147 @@ app.post("/api/upload-csv", upload.single("csvFile"), async (req, res) => {
     }
 
     const filePath = req.file.path;
-    console.log(`📁 Processing uploaded CSV: ${req.file.originalname}`);
+    const fileName = req.file.originalname;
+    const processInBackground = req.body.processInBackground === "true";
+    const clearExisting = req.body.clearExisting === "true";
+    const generateEmbeddings = req.body.generateEmbeddings !== "false"; // default true
 
-    // Import the CSV processing functions
-    const Document = require("./models/Document");
+    console.log(`📁 Processing uploaded CSV: ${fileName}`);
+    console.log(`📋 Background processing: ${processInBackground}`);
 
-    // Clear existing documents
-    console.log("🗑️ Clearing existing documents...");
-    await Document.deleteMany({});
+    if (processInBackground && backgroundEmbeddingService) {
+      // Add to background processing queue
+      const csvTask = backgroundEmbeddingService.addCsvToQueue(filePath, fileName, {
+        clearExisting,
+        generateEmbeddings,
+        batchSize: parseInt(req.body.batchSize) || 1000
+      });
 
-    // Process CSV file
-    const records = [];
-    let totalProcessed = 0;
-    let totalInserted = 0;
+      return res.json({
+        success: true,
+        message: "CSV file added to background processing queue",
+        taskId: csvTask.id,
+        fileName: fileName,
+        processInBackground: true,
+        queueStatus: backgroundEmbeddingService.getCsvQueueStatus()
+      });
+    } else {
+      // Process immediately (legacy behavior)
+      const Document = require("./models/Document");
 
-    return new Promise((resolve) => {
-      fs.createReadStream(filePath)
-        .pipe(
-          csv({
-            skipEmptyLines: true,
-            headers: [
-              "StateName",
-              "DistrictName",
-              "BlockName",
-              "Season",
-              "Sector",
-              "Category",
-              "Crop",
-              "QueryType",
-              "QueryText",
-              "KccAns",
-              "CreatedOn",
-              "year",
-              "month",
-            ],
-          })
-        )
-        .on("data", (data) => {
-          totalProcessed++;
+      // Clear existing documents if requested
+      if (clearExisting) {
+        console.log("🗑️ Clearing existing documents...");
+        await Document.deleteMany({});
+      }
 
-          // Skip header row
-          if (totalProcessed === 1 && data.StateName === "StateName") {
-            return;
-          }
+      // Process CSV file
+      const records = [];
+      let totalProcessed = 0;
+      let totalInserted = 0;
 
-          // Parse and clean data
-          const cleanRecord = {
-            StateName: data.StateName?.trim() || "",
-            DistrictName: data.DistrictName?.trim() || "",
-            BlockName: data.BlockName?.trim() || "",
-            Season: data.Season?.trim() || "",
-            Sector: data.Sector?.trim() || "",
-            Category: data.Category?.trim() || "",
-            Crop: data.Crop?.trim() || "",
-            QueryType: data.QueryType?.trim() || "",
-            QueryText: data.QueryText?.trim() || "",
-            KccAns: data.KccAns?.trim() || "",
-            CreatedOn: data.CreatedOn ? new Date(data.CreatedOn) : new Date(),
-            year: data.year ? parseInt(data.year) : null,
-            month: data.month ? parseInt(data.month) : null,
-            embedding: [],
-          };
+      return new Promise((resolve) => {
+        fs.createReadStream(filePath)
+          .pipe(
+            csv({
+              skipEmptyLines: true,
+              headers: [
+                "StateName",
+                "DistrictName",
+                "BlockName",
+                "Season",
+                "Sector",
+                "Category",
+                "Crop",
+                "QueryType",
+                "QueryText",
+                "KccAns",
+                "CreatedOn",
+                "year",
+                "month",
+              ],
+            })
+          )
+          .on("data", (data) => {
+            totalProcessed++;
 
-          records.push(cleanRecord);
-
-          // Process in batches
-          if (records.length >= 1000) {
-            processRecordBatch(records.splice(0, 1000))
-              .then((count) => {
-                totalInserted += count;
-              })
-              .catch(console.error);
-          }
-        })
-        .on("end", async () => {
-          try {
-            // Process remaining records
-            if (records.length > 0) {
-              const count = await processRecordBatch(records);
-              totalInserted += count;
+            // Skip header row
+            if (totalProcessed === 1 && data.StateName === "StateName") {
+              return;
             }
 
-            // Clean up uploaded file
-            fs.unlinkSync(filePath);
+            // Parse and clean data
+            const cleanRecord = {
+              StateName: data.StateName?.trim() || "",
+              DistrictName: data.DistrictName?.trim() || "",
+              BlockName: data.BlockName?.trim() || "",
+              Season: data.Season?.trim() || "",
+              Sector: data.Sector?.trim() || "",
+              Category: data.Category?.trim() || "",
+              Crop: data.Crop?.trim() || "",
+              QueryType: data.QueryType?.trim() || "",
+              QueryText: data.QueryText?.trim() || "",
+              KccAns: data.KccAns?.trim() || "",
+              CreatedOn: data.CreatedOn ? new Date(data.CreatedOn) : new Date(),
+              year: data.year ? parseInt(data.year) : null,
+              month: data.month ? parseInt(data.month) : null,
+              embedding: [],
+            };
 
-            console.log(
-              `✅ CSV processing completed: ${totalInserted} documents inserted`
-            );
+            records.push(cleanRecord);
 
-            res.json({
-              success: true,
-              message: "CSV uploaded and processed successfully",
-              totalProcessed: totalProcessed - 1, // Subtract header row
-              totalInserted: totalInserted,
-            });
+            // Process in batches
+            if (records.length >= 1000) {
+              processRecordBatch(records.splice(0, 1000))
+                .then((count) => {
+                  totalInserted += count;
+                })
+                .catch(console.error);
+            }
+          })
+          .on("end", async () => {
+            try {
+              // Process remaining records
+              if (records.length > 0) {
+                const count = await processRecordBatch(records);
+                totalInserted += count;
+              }
 
-            resolve();
-          } catch (error) {
-            console.error("CSV processing error:", error);
+              // Clean up uploaded file
+              fs.unlinkSync(filePath);
+
+              console.log(
+                `✅ CSV processing completed: ${totalInserted} documents inserted`
+              );
+
+              res.json({
+                success: true,
+                message: "CSV uploaded and processed successfully",
+                totalProcessed: totalProcessed - 1, // Subtract header row
+                totalInserted: totalInserted,
+                processInBackground: false
+              });
+
+              resolve();
+            } catch (error) {
+              console.error("CSV processing error:", error);
+              res.status(500).json({
+                error: "CSV processing failed",
+                message: error.message,
+              });
+              resolve();
+            }
+          })
+          .on("error", (error) => {
+            console.error("CSV parsing error:", error);
             res.status(500).json({
-              error: "CSV processing failed",
+              error: "CSV parsing failed",
               message: error.message,
             });
             resolve();
-          }
-        })
-        .on("error", (error) => {
-          console.error("CSV parsing error:", error);
-          res.status(500).json({
-            error: "CSV parsing failed",
-            message: error.message,
           });
-          resolve();
-        });
-    });
+      });
+    }
   } catch (error) {
     console.error("❌ CSV upload error:", error);
     res.status(500).json({
@@ -429,6 +496,409 @@ app.post("/api/generate-embeddings", async (req, res) => {
   }
 });
 
+// ==========================================
+// BACKGROUND EMBEDDING ENDPOINTS
+// ==========================================
+
+/**
+ * Start background embedding generation
+ */
+app.post("/api/background-embeddings/start", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const options = req.body || {};
+
+    console.log("🚀 Starting background embedding generation...");
+
+    // Set up callbacks for real-time updates
+    backgroundEmbeddingService.onProgress((status) => {
+      console.log(
+        `📊 Progress: ${status.progress}% (${status.processedDocuments}/${status.totalDocuments})`
+      );
+    });
+
+    backgroundEmbeddingService.onComplete((status) => {
+      console.log("🎉 Background embedding generation completed!");
+      isEmbeddingsReady = true;
+    });
+
+    backgroundEmbeddingService.onError((error, status) => {
+      console.error("❌ Background embedding error:", error.message);
+    });
+
+    // Start the process (non-blocking)
+    backgroundEmbeddingService.start(options).catch((error) => {
+      console.error("❌ Failed to start background embedding:", error);
+    });
+
+    res.json({
+      success: true,
+      message: "Background embedding generation started successfully",
+      status: backgroundEmbeddingService.getStatus(),
+      configuration: backgroundEmbeddingService.getConfiguration(),
+    });
+  } catch (error) {
+    console.error("❌ Background embedding start error:", error);
+    res.status(500).json({
+      error: "Failed to start background embedding generation",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Pause background embedding generation
+ */
+app.post("/api/background-embeddings/pause", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const status = await backgroundEmbeddingService.pause();
+
+    res.json({
+      success: true,
+      message: "Background embedding generation paused successfully",
+      status: status,
+    });
+  } catch (error) {
+    console.error("❌ Background embedding pause error:", error);
+    res.status(400).json({
+      error: "Failed to pause background embedding generation",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Resume background embedding generation
+ */
+app.post("/api/background-embeddings/resume", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const status = await backgroundEmbeddingService.resume();
+
+    res.json({
+      success: true,
+      message: "Background embedding generation resumed successfully",
+      status: status,
+    });
+  } catch (error) {
+    console.error("❌ Background embedding resume error:", error);
+    res.status(400).json({
+      error: "Failed to resume background embedding generation",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Stop background embedding generation
+ */
+app.post("/api/background-embeddings/stop", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const status = await backgroundEmbeddingService.stop();
+
+    res.json({
+      success: true,
+      message: "Background embedding generation stopped successfully",
+      status: status,
+    });
+  } catch (error) {
+    console.error("❌ Background embedding stop error:", error);
+    res.status(400).json({
+      error: "Failed to stop background embedding generation",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get background embedding generation status
+ */
+app.get("/api/background-embeddings/status", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const detailed = req.query.detailed === "true";
+
+    if (detailed) {
+      res.json({
+        success: true,
+        status: backgroundEmbeddingService.getStatistics(),
+      });
+    } else {
+      res.json({
+        success: true,
+        status: backgroundEmbeddingService.getStatus(),
+      });
+    }
+  } catch (error) {
+    console.error("❌ Background embedding status error:", error);
+    res.status(500).json({
+      error: "Failed to get background embedding status",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Safety check - validate what documents will be processed without embeddings
+ */
+app.get("/api/background-embeddings/safety-check", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const safetyValidation =
+      await backgroundEmbeddingService.validateSafetyFilter();
+
+    res.json({
+      success: true,
+      safetyValidation,
+    });
+  } catch (error) {
+    console.error("❌ Background embedding safety check error:", error);
+    res.status(500).json({
+      error: "Failed to perform safety check",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get background embedding generation logs
+ */
+app.get("/api/background-embeddings/logs", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const limit = parseInt(req.query.limit) || 50;
+    const level = req.query.level || null;
+    const clear = req.query.clear === "true";
+
+    let logs = backgroundEmbeddingService.getLogs(limit, level);
+
+    if (clear) {
+      backgroundEmbeddingService.clearLogs();
+    }
+
+    res.json({
+      success: true,
+      logs: logs,
+      totalLogs: logs.length,
+      filters: {
+        limit: limit,
+        level: level,
+      },
+    });
+  } catch (error) {
+    console.error("❌ Background embedding logs error:", error);
+    res.status(500).json({
+      error: "Failed to get background embedding logs",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Configure background embedding generation
+ */
+app.post("/api/background-embeddings/config", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const options = req.body || {};
+
+    backgroundEmbeddingService.configure(options);
+
+    res.json({
+      success: true,
+      message: "Configuration updated successfully",
+      configuration: backgroundEmbeddingService.getConfiguration(),
+    });
+  } catch (error) {
+    console.error("❌ Background embedding config error:", error);
+    res.status(400).json({
+      error: "Failed to update configuration",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Reset background embedding service
+ */
+app.post("/api/background-embeddings/reset", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    backgroundEmbeddingService.reset();
+
+    res.json({
+      success: true,
+      message: "Background embedding service reset successfully",
+    });
+  } catch (error) {
+    console.error("❌ Background embedding reset error:", error);
+    res.status(400).json({
+      error: "Failed to reset background embedding service",
+      message: error.message,
+    });
+  }
+});
+
+// ==========================================
+// CSV QUEUE MANAGEMENT ENDPOINTS
+// ==========================================
+
+/**
+ * Get CSV processing queue status
+ */
+app.get("/api/csv-queue/status", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    const queueStatus = backgroundEmbeddingService.getCsvQueueStatus();
+
+    res.json({
+      success: true,
+      queueStatus: queueStatus,
+    });
+  } catch (error) {
+    console.error("❌ CSV queue status error:", error);
+    res.status(500).json({
+      error: "Failed to get CSV queue status",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Clear CSV processing queue
+ */
+app.post("/api/csv-queue/clear", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    backgroundEmbeddingService.clearCsvQueue();
+
+    res.json({
+      success: true,
+      message: "CSV queue cleared successfully",
+    });
+  } catch (error) {
+    console.error("❌ CSV queue clear error:", error);
+    res.status(500).json({
+      error: "Failed to clear CSV queue",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Stop CSV processing
+ */
+app.post("/api/csv-queue/stop", (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    backgroundEmbeddingService.stopCsvProcessing();
+
+    res.json({
+      success: true,
+      message: "CSV processing stopped successfully",
+    });
+  } catch (error) {
+    console.error("❌ CSV processing stop error:", error);
+    res.status(500).json({
+      error: "Failed to stop CSV processing",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Start CSV processing queue
+ */
+app.post("/api/csv-queue/start", async (req, res) => {
+  try {
+    if (!backgroundEmbeddingService) {
+      return res.status(503).json({
+        error: "Background embedding service not available",
+      });
+    }
+
+    await backgroundEmbeddingService.startCsvProcessing();
+
+    res.json({
+      success: true,
+      message: "CSV processing queue started",
+      queueStatus: backgroundEmbeddingService.getCsvQueueStatus(),
+    });
+  } catch (error) {
+    console.error("❌ CSV processing start error:", error);
+    res.status(500).json({
+      error: "Failed to start CSV processing",
+      message: error.message,
+    });
+  }
+});
+
+// ==========================================
+// END BACKGROUND EMBEDDING ENDPOINTS
+// ==========================================
+
 // Error handling middleware
 app.use((error, req, res, next) => {
   console.error("❌ Unhandled error:", error);
@@ -449,6 +919,18 @@ app.use((req, res) => {
       "POST /api/search",
       "POST /api/search-fallback",
       "POST /api/generate-embeddings",
+      "POST /api/background-embeddings/start",
+      "POST /api/background-embeddings/pause",
+      "POST /api/background-embeddings/resume",
+      "POST /api/background-embeddings/stop",
+      "GET /api/background-embeddings/status",
+      "GET /api/background-embeddings/logs",
+      "POST /api/background-embeddings/config",
+      "POST /api/background-embeddings/reset",
+      "GET /api/csv-queue/status",
+      "POST /api/csv-queue/clear",
+      "POST /api/csv-queue/stop",
+      "POST /api/csv-queue/start",
     ],
   });
 });
@@ -459,6 +941,40 @@ app.listen(PORT, async () => {
   console.log(`📡 API URL: http://localhost:${PORT}`);
   console.log(`🌐 Web Interface: http://localhost:${PORT}`);
   console.log(`📊 Status: http://localhost:${PORT}/api/status`);
+
+  // Setup background service callbacks
+  if (backgroundEmbeddingService) {
+    // Embedding progress callbacks
+    backgroundEmbeddingService.onProgress((status) => {
+      console.log(
+        `📊 Embedding Progress: ${status.progress}% (${status.processedDocuments}/${status.totalDocuments})`
+      );
+    });
+
+    backgroundEmbeddingService.onComplete((status) => {
+      console.log("🎉 Background embedding generation completed!");
+      isEmbeddingsReady = true;
+    });
+
+    backgroundEmbeddingService.onError((error, status) => {
+      console.error("❌ Background embedding error:", error.message);
+    });
+
+    // CSV processing callbacks
+    backgroundEmbeddingService.onCsvProgress((task) => {
+      console.log(
+        `📄 CSV Progress: ${task.fileName} - ${task.progress.toFixed(1)}% (${task.processedRecords}/${task.totalRecords})`
+      );
+    });
+
+    backgroundEmbeddingService.onCsvComplete((task) => {
+      console.log(`✅ CSV Processing completed: ${task.fileName} - ${task.insertedRecords} documents inserted`);
+    });
+
+    backgroundEmbeddingService.onCsvError((error, task) => {
+      console.error(`❌ CSV Processing error for ${task.fileName}:`, error.message);
+    });
+  }
 
   // Initialize the system
   await initializeSystem();
