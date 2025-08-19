@@ -1,12 +1,15 @@
 # 🚀 API Reference - Kishan Call
 
 ## Base URL
+
 ```
 http://localhost:5000
 ```
 
 ## Response Format
+
 All API responses follow this structure:
+
 ```json
 {
   "success": true,
@@ -17,6 +20,7 @@ All API responses follow this structure:
 ```
 
 ## Error Responses
+
 ```json
 {
   "error": "Error description",
@@ -31,11 +35,13 @@ All API responses follow this structure:
 ## 🏠 System Endpoints
 
 ### Health Check
+
 ```http
 GET /
 ```
 
 **Response:**
+
 ```json
 {
   "message": "🚀 Semantic Search CSV Manager is running!",
@@ -50,11 +56,13 @@ GET /
 ```
 
 ### System Status
+
 ```http
 GET /api/status
 ```
 
 **Response:**
+
 ```json
 {
   "database": {
@@ -76,18 +84,21 @@ GET /api/status
 ## 📊 Data Management
 
 ### Upload CSV File
+
 ```http
 POST /api/upload-csv
 Content-Type: multipart/form-data
 ```
 
 **Parameters:**
+
 - `csvFile` (file, required): CSV file to upload
 - `processInBackground` (boolean): Process file in background queue
 - `clearExisting` (boolean): Clear existing data before import
 - `generateEmbeddings` (boolean): Generate embeddings after import
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -100,15 +111,18 @@ Content-Type: multipart/form-data
 ```
 
 ### Get Latest Data
+
 ```http
 GET /api/latest-data?limit=10&filters={"StateName":"Punjab"}
 ```
 
 **Query Parameters:**
+
 - `limit` (number): Number of documents to return (default: 10)
 - `filters` (JSON string): Filter criteria
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -134,12 +148,14 @@ GET /api/latest-data?limit=10&filters={"StateName":"Punjab"}
 ## 🔍 Search Operations
 
 ### Semantic Search
+
 ```http
 POST /api/search
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "query": "rice farming techniques",
@@ -152,6 +168,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -178,6 +195,7 @@ Content-Type: application/json
 ```
 
 ### Fallback Search
+
 ```http
 POST /api/search-fallback
 Content-Type: application/json
@@ -192,12 +210,14 @@ Same request/response format as semantic search, but uses manual cosine similari
 ### Background Embeddings
 
 #### Start Background Embedding Generation
+
 ```http
 POST /api/background-embeddings/start
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "batchSize": 50,
@@ -209,6 +229,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -223,11 +244,13 @@ Content-Type: application/json
 ```
 
 #### Get Background Status
+
 ```http
 GET /api/background-embeddings/status?detailed=true
 ```
 
 **Response:**
+
 ```json
 {
   "status": {
@@ -250,6 +273,7 @@ GET /api/background-embeddings/status?detailed=true
 ```
 
 #### Control Background Processing
+
 ```http
 POST /api/background-embeddings/pause
 POST /api/background-embeddings/resume
@@ -257,6 +281,7 @@ POST /api/background-embeddings/stop
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -269,11 +294,13 @@ POST /api/background-embeddings/stop
 ```
 
 #### Get Background Logs
+
 ```http
 GET /api/background-embeddings/logs?level=info&limit=100
 ```
 
 **Response:**
+
 ```json
 {
   "logs": [
@@ -292,12 +319,14 @@ GET /api/background-embeddings/logs?level=info&limit=100
 ```
 
 #### Configure Background Processing
+
 ```http
 POST /api/background-embeddings/config
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "batchSize": 25,
@@ -312,11 +341,13 @@ Content-Type: application/json
 ## 📋 CSV Queue Management
 
 ### Get Queue Status
+
 ```http
 GET /api/csv-queue/status
 ```
 
 **Response:**
+
 ```json
 {
   "queueStatus": {
@@ -351,6 +382,7 @@ GET /api/csv-queue/status
 ```
 
 ### Control Queue Processing
+
 ```http
 POST /api/csv-queue/start
 POST /api/csv-queue/stop
@@ -358,6 +390,7 @@ POST /api/csv-queue/clear
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -374,11 +407,13 @@ POST /api/csv-queue/clear
 ## 🔧 Generate Embeddings
 
 ### Generate Embeddings for All Documents
+
 ```http
 POST /api/generate-embeddings
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -392,34 +427,35 @@ POST /api/generate-embeddings
 
 ## ⚠️ Error Codes
 
-| Code | Description |
-|------|-------------|
-| `MONGODB_CONNECTION_ERROR` | Database connection failed |
-| `INVALID_CSV_FORMAT` | Uploaded file is not a valid CSV |
-| `EMBEDDING_GENERATION_FAILED` | Failed to generate embeddings |
-| `SEARCH_QUERY_EMPTY` | Search query is required |
-| `BACKGROUND_PROCESS_ERROR` | Background processing error |
-| `QUEUE_OPERATION_FAILED` | CSV queue operation failed |
-| `INSUFFICIENT_PERMISSIONS` | Operation not permitted |
-| `RATE_LIMIT_EXCEEDED` | Too many requests |
+| Code                          | Description                      |
+| ----------------------------- | -------------------------------- |
+| `MONGODB_CONNECTION_ERROR`    | Database connection failed       |
+| `INVALID_CSV_FORMAT`          | Uploaded file is not a valid CSV |
+| `EMBEDDING_GENERATION_FAILED` | Failed to generate embeddings    |
+| `SEARCH_QUERY_EMPTY`          | Search query is required         |
+| `BACKGROUND_PROCESS_ERROR`    | Background processing error      |
+| `QUEUE_OPERATION_FAILED`      | CSV queue operation failed       |
+| `INSUFFICIENT_PERMISSIONS`    | Operation not permitted          |
+| `RATE_LIMIT_EXCEEDED`         | Too many requests                |
 
 ---
 
 ## 📈 Response Times
 
-| Endpoint | Average Response Time |
-|----------|----------------------|
-| `GET /api/status` | 50ms |
-| `GET /api/latest-data` | 80ms |
-| `POST /api/search` | 150ms |
-| `POST /api/search-fallback` | 300ms |
-| `POST /api/upload-csv` | 2-10s (varies by file size) |
+| Endpoint                    | Average Response Time       |
+| --------------------------- | --------------------------- |
+| `GET /api/status`           | 50ms                        |
+| `GET /api/latest-data`      | 80ms                        |
+| `POST /api/search`          | 150ms                       |
+| `POST /api/search-fallback` | 300ms                       |
+| `POST /api/upload-csv`      | 2-10s (varies by file size) |
 
 ---
 
 ## 🔒 Authentication
 
 Currently, the API does not require authentication. Future versions will include:
+
 - API key authentication
 - JWT token-based authentication
 - Role-based access control

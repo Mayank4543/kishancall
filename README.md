@@ -5,25 +5,27 @@ A comprehensive Express.js server with MongoDB Atlas integration, featuring sema
 ## 📸 UI Screenshots
 
 ### 🌿 Farming-Themed Interface
+
 Our beautiful green-themed interface designed specifically for the agricultural community:
 
 ![Main Dashboard](./public/image/image1001.jpg)
-*Main Dashboard - Overview of the semantic search platform with farming theme*
+_Main Dashboard - Overview of the semantic search platform with farming theme_
 
 ![Search Interface](./public/image/image1002.jpg)
-*Smart Search Interface - Real-time search with latest data display*
+_Smart Search Interface - Real-time search with latest data display_
 
 ![Background Processing](./public/image/image1003.jpg)
-*Background Processing Manager - Queue management and embedding generation*
+_Background Processing Manager - Queue management and embedding generation_
 
 ![Data Management](./public/image/image1004.jpg)
-*Data Management - CSV upload and processing with real-time status*
+_Data Management - CSV upload and processing with real-time status_
 
 ---
 
 ## 🚀 Features
 
 ### Core Features
+
 - ✅ **MongoDB Atlas Integration** - Robust database connectivity with error handling
 - ✅ **Semantic Search** - Advanced vector search using local Xenova transformers
 - ✅ **CSV Data Management** - Upload and process agricultural CSV data
@@ -32,6 +34,7 @@ Our beautiful green-themed interface designed specifically for the agricultural 
 - ✅ **Farming Theme UI** - Beautiful green-themed interface with farming elements
 
 ### Advanced Features
+
 - ✅ **Latest Data Display** - Shows newest agricultural data when users start searching
 - ✅ **Background Embedding Generation** - Automated, configurable embedding processing
 - ✅ **CSV Queue Management** - Multi-file processing with status tracking
@@ -40,6 +43,7 @@ Our beautiful green-themed interface designed specifically for the agricultural 
 - ✅ **Comprehensive API** - RESTful endpoints for all operations
 
 ### User Experience
+
 - 🌾 **Intuitive Interface** - Farming-themed design with green gradients
 - 📱 **Responsive Design** - Works seamlessly on all devices
 - 🔍 **Smart Search** - Shows latest data for short queries, performs semantic search for longer ones
@@ -106,20 +110,25 @@ Visit `http://localhost:5000` to access the web interface.
 ### Core Endpoints
 
 #### Health Check
+
 ```http
 GET /
 ```
+
 Returns server status and available endpoints.
 
 #### System Status
+
 ```http
 GET /api/status
 ```
+
 Returns database statistics and system health.
 
 ### Data Management
 
 #### Upload CSV
+
 ```http
 POST /api/upload-csv
 Content-Type: multipart/form-data
@@ -133,14 +142,17 @@ Content-Type: multipart/form-data
 ```
 
 #### Get Latest Data
+
 ```http
 GET /api/latest-data?limit=10&filters={"StateName":"Punjab"}
 ```
+
 Returns the newest agricultural data sorted by creation date.
 
 ### Search Operations
 
 #### Semantic Search
+
 ```http
 POST /api/search
 Content-Type: application/json
@@ -156,6 +168,7 @@ Content-Type: application/json
 ```
 
 #### Fallback Search
+
 ```http
 POST /api/search-fallback
 Content-Type: application/json
@@ -170,6 +183,7 @@ Content-Type: application/json
 ### Background Processing
 
 #### Background Embeddings
+
 ```http
 # Start background embedding generation
 POST /api/background-embeddings/start
@@ -193,6 +207,7 @@ GET /api/background-embeddings/logs?level=info&limit=100
 ```
 
 #### CSV Queue Management
+
 ```http
 # Get queue status
 GET /api/csv-queue/status
@@ -230,24 +245,28 @@ POST /api/csv-queue/clear
 ## 🎨 UI Features
 
 ### Farming Theme Elements
+
 - 🌱 **Green Color Palette** - Various shades of green representing agriculture
 - 🌾 **Agricultural Icons** - Farming-themed icons and emojis
 - 🌿 **Nature Gradients** - Smooth green gradients throughout the interface
 - 📱 **Responsive Design** - Mobile-friendly farming theme
 
 ### Smart Search Behavior
+
 1. **Empty Query** - Shows welcome message
 2. **1-2 Characters** - Displays latest agricultural data (500ms delay)
 3. **3+ Characters** - Performs semantic search (800ms delay)
 4. **Real-time Results** - Updates as user types
 
 ### Visual Indicators
+
 - **Latest Data** - Green badges and special styling (see image1002.jpg)
 - **Search Results** - Similarity scores and relevance indicators
 - **Processing Status** - Live progress bars and status indicators (see image1003.jpg)
 - **Queue Management** - Real-time queue status and file processing (see image1004.jpg)
 
 ### Interface Highlights
+
 - **Dashboard Overview** - Clean, organized layout with farming aesthetics (image1001.jpg)
 - **Interactive Elements** - Hover effects, smooth transitions, and farming-inspired animations
 - **Status Monitoring** - Real-time system health and processing status displays
@@ -256,12 +275,14 @@ POST /api/csv-queue/clear
 ## ⚙️ Configuration Options
 
 ### Background Embedding Settings
+
 - **Batch Size** - Number of documents processed per batch (default: 50)
 - **Delay Between Batches** - Milliseconds between batches (default: 1000)
 - **Retry Attempts** - Number of retry attempts for failed documents (default: 3)
 - **Priority Levels** - normal, high, low processing priorities
 
 ### Search Configuration
+
 - **Results Limit** - 5, 10, 20, or 50 results
 - **Search Methods** - Vector search with fallback support
 - **Filters** - State, Category, and other field filters
@@ -270,18 +291,21 @@ POST /api/csv-queue/clear
 ## 🔧 Advanced Features
 
 ### Background Processing
+
 - **Queue-based System** - Multiple CSV files processed sequentially
 - **Progress Tracking** - Real-time progress monitoring
 - **Error Handling** - Comprehensive error tracking and retry logic
 - **Resource Management** - Memory-efficient batch processing
 
 ### Search Optimization
+
 - **Query Caching** - Embedding cache for repeated queries
 - **Fallback Support** - Manual cosine similarity when vector search fails
 - **Smart Filtering** - Multiple filter combinations
 - **Result Ranking** - Similarity-based result ordering
 
 ### Monitoring & Logging
+
 - **Real-time Status** - Live system health monitoring
 - **Detailed Logs** - Comprehensive operation logging
 - **Performance Metrics** - Search timing and processing statistics
@@ -292,6 +316,7 @@ POST /api/csv-queue/clear
 ### For Developers
 
 1. **Clone and Setup**
+
    ```bash
    git clone <repository-url>
    cd kishancall
@@ -299,11 +324,13 @@ POST /api/csv-queue/clear
    ```
 
 2. **Configure Environment**
+
    - Set up MongoDB Atlas cluster
    - Create vector search index
    - Configure environment variables
 
 3. **Import Sample Data**
+
    - Use the web interface to upload CSV files
    - Enable background processing for large files
 
@@ -352,4 +379,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **🌾 Happy Farming! 🌾**
 
-*Built with ❤️ for the agricultural community*
+_Built with ❤️ for the agricultural community_

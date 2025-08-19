@@ -17,7 +17,7 @@ function initializeApp() {
   addLog("🚀 Application initialized", "info");
   refreshSystemStatus();
   refreshBackgroundStatus();
-  
+
   // Show latest data on page load
   setTimeout(() => {
     addLog("📅 Loading latest data...", "info");
@@ -49,12 +49,10 @@ function setupEventListeners() {
   document
     .getElementById("search-btn")
     .addEventListener("click", performSearch);
-  document
-    .getElementById("show-latest-btn")
-    .addEventListener("click", () => {
-      const limit = parseInt(document.getElementById("search-limit").value);
-      showLatestData(limit);
-    });
+  document.getElementById("show-latest-btn").addEventListener("click", () => {
+    const limit = parseInt(document.getElementById("search-limit").value);
+    showLatestData(limit);
+  });
   document
     .getElementById("clear-logs-btn")
     .addEventListener("click", clearLogs);
@@ -71,26 +69,26 @@ function setupEventListeners() {
   let searchTimeout;
   searchInput.addEventListener("input", function (e) {
     const query = e.target.value.trim();
-    
+
     // Clear previous timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
-    
+
     // If empty, clear results
     if (!query) {
-      document.getElementById("search-results").innerHTML = '';
-      document.getElementById("results-count").textContent = '0 results';
+      document.getElementById("search-results").innerHTML = "";
+      document.getElementById("results-count").textContent = "0 results";
       return;
     }
-    
+
     // If 1-2 characters, show latest data after a delay
     if (query.length >= 1 && query.length < 3) {
       searchTimeout = setTimeout(() => {
         showLatestData(parseInt(document.getElementById("search-limit").value));
       }, 500); // 500ms delay
     }
-    
+
     // If 3+ characters, perform search after a delay
     if (query.length >= 3) {
       searchTimeout = setTimeout(() => {
@@ -383,11 +381,11 @@ async function showLatestData(limit = 10) {
     if (categoryFilter) filters.Category = categoryFilter;
 
     const startTime = Date.now();
-    
+
     // Build query string
     let queryString = `limit=${limit}`;
     if (Object.keys(filters).length > 0) {
-      queryString += '&filters=' + encodeURIComponent(JSON.stringify(filters));
+      queryString += "&filters=" + encodeURIComponent(JSON.stringify(filters));
     }
 
     const response = await fetch(`/api/latest-data?${queryString}`);
@@ -470,7 +468,12 @@ function updateLastSearchTime(time) {
   document.getElementById("last-search-time").textContent = time + "ms";
 }
 
-function displaySearchResults(results, query, searchTime, isLatestData = false) {
+function displaySearchResults(
+  results,
+  query,
+  searchTime,
+  isLatestData = false
+) {
   const resultsContainer = document.getElementById("search-results");
   const resultsCount = document.getElementById("results-count");
 
@@ -480,8 +483,14 @@ function displaySearchResults(results, query, searchTime, isLatestData = false) 
     resultsContainer.innerHTML = `
             <div class="text-center text-muted p-4">
                 <i class="fas fa-search fa-3x mb-3"></i>
-                <p>No results found${isLatestData ? " in latest data" : ` for "${query}"`}</p>
-                <small>${isLatestData ? "Try removing filters or upload more data" : "Try different keywords or check your filters"}</small>
+                <p>No results found${
+                  isLatestData ? " in latest data" : ` for "${query}"`
+                }</p>
+                <small>${
+                  isLatestData
+                    ? "Try removing filters or upload more data"
+                    : "Try different keywords or check your filters"
+                }</small>
             </div>
         `;
     return;
@@ -493,25 +502,28 @@ function displaySearchResults(results, query, searchTime, isLatestData = false) 
     const similarity = result.similarity
       ? (result.similarity * 100).toFixed(1)
       : null;
-    
+
     // Format date for latest data
-    const createdDate = result.CreatedOn 
+    const createdDate = result.CreatedOn
       ? new Date(result.CreatedOn).toLocaleDateString()
       : "N/A";
-    
+
     // Different styling for latest data vs search results
-    const cardClass = isLatestData ? "search-result latest-data-item" : "search-result";
-    const headerText = isLatestData 
+    const cardClass = isLatestData
+      ? "search-result latest-data-item"
+      : "search-result";
+    const headerText = isLatestData
       ? `${index + 1}. ${result.Category || "General"} (${createdDate})`
       : `${index + 1}. ${result.Category || "General"}`;
-    
+
     html += `
             <div class="${cardClass}">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h6 class="mb-0">${headerText}</h6>
-                    ${isLatestData 
-                      ? `<span class="badge bg-success">Latest</span>`
-                      : `<span class="similarity-score">${similarity}%</span>`
+                    ${
+                      isLatestData
+                        ? `<span class="badge bg-success">Latest</span>`
+                        : `<span class="similarity-score">${similarity}%</span>`
                     }
                 </div>
                 <div class="row">
@@ -540,12 +552,16 @@ function displaySearchResults(results, query, searchTime, isLatestData = false) 
                       200
                     )}</p>
                 </div>
-                ${isLatestData ? `
+                ${
+                  isLatestData
+                    ? `
                 <div class="mt-2">
                     <small class="text-muted">Added:</small>
                     <p class="mb-0 text-success">${createdDate}</p>
                 </div>
-                ` : ''}
+                `
+                    : ""
+                }
             </div>
         `;
   });

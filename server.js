@@ -469,12 +469,12 @@ app.post("/api/search-fallback", async (req, res) => {
 app.get("/api/latest-data", async (req, res) => {
   try {
     const { limit = 10, filters = {} } = req.query;
-    
+
     console.log(`📅 Fetching latest ${limit} documents`);
 
     // Build the MongoDB filter
     const mongoFilter = {};
-    
+
     // Add optional filters
     if (filters.StateName) {
       mongoFilter.StateName = new RegExp(filters.StateName, "i");
@@ -484,7 +484,7 @@ app.get("/api/latest-data", async (req, res) => {
     }
 
     const startTime = Date.now();
-    
+
     // Get the latest documents sorted by CreatedOn (newest first)
     const latestDocuments = await Document.find(mongoFilter, {
       _id: 1,
@@ -498,13 +498,15 @@ app.get("/api/latest-data", async (req, res) => {
       Season: 1,
       CreatedOn: 1,
     })
-    .sort({ CreatedOn: -1 }) // Sort by newest first
-    .limit(parseInt(limit))
-    .lean();
-    
+      .sort({ CreatedOn: -1 }) // Sort by newest first
+      .limit(parseInt(limit))
+      .lean();
+
     const fetchTime = Date.now() - startTime;
-    
-    console.log(`✅ Fetched ${latestDocuments.length} latest documents in ${fetchTime}ms`);
+
+    console.log(
+      `✅ Fetched ${latestDocuments.length} latest documents in ${fetchTime}ms`
+    );
 
     res.json({
       success: true,
