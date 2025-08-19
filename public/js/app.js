@@ -17,6 +17,12 @@ function initializeApp() {
   addLog("🚀 Application initialized", "info");
   refreshSystemStatus();
   refreshBackgroundStatus();
+  
+  // Show latest data on page load
+  setTimeout(() => {
+    addLog("📅 Loading latest data...", "info");
+    showLatestData(10);
+  }, 1000);
 }
 
 // Setup all event listeners
@@ -44,17 +50,54 @@ function setupEventListeners() {
     .getElementById("search-btn")
     .addEventListener("click", performSearch);
   document
+    .getElementById("show-latest-btn")
+    .addEventListener("click", () => {
+      const limit = parseInt(document.getElementById("search-limit").value);
+      showLatestData(limit);
+    });
+  document
     .getElementById("clear-logs-btn")
     .addEventListener("click", clearLogs);
 
-  // Search input - Enter key
-  document
-    .getElementById("search-query")
-    .addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
+  // Search input - Enter key and real-time search
+  const searchInput = document.getElementById("search-query");
+  searchInput.addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      performSearch();
+    }
+  });
+
+  // Real-time search: show latest data when user starts typing
+  let searchTimeout;
+  searchInput.addEventListener("input", function (e) {
+    const query = e.target.value.trim();
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // If empty, clear results
+    if (!query) {
+      document.getElementById("search-results").innerHTML = '';
+      document.getElementById("results-count").textContent = '0 results';
+      return;
+    }
+    
+    // If 1-2 characters, show latest data after a delay
+    if (query.length >= 1 && query.length < 3) {
+      searchTimeout = setTimeout(() => {
+        showLatestData(parseInt(document.getElementById("search-limit").value));
+      }, 500); // 500ms delay
+    }
+    
+    // If 3+ characters, perform search after a delay
+    if (query.length >= 3) {
+      searchTimeout = setTimeout(() => {
         performSearch();
-      }
-    });
+      }, 800); // 800ms delay for full search
+    }
+  });
 
   // Quick search buttons
   document.querySelectorAll(".quick-search").forEach((btn) => {
@@ -170,12 +213,15 @@ async function uploadCSV() {
 
   const formData = new FormData();
   formData.append("csvFile", file);
-  
+
   // Get processing options
-  const processInBackground = document.getElementById("process-background").checked;
+  const processInBackground =
+    document.getElementById("process-background").checked;
   const clearExisting = document.getElementById("clear-existing").checked;
-  const generateEmbeddings = document.getElementById("generate-embeddings").checked;
-  
+  const generateEmbeddings = document.getElementById(
+    "generate-embeddings"
+  ).checked;
+
   formData.append("processInBackground", processInBackground);
   formData.append("clearExisting", clearExisting);
   formData.append("generateEmbeddings", generateEmbeddings);
@@ -198,7 +244,10 @@ async function uploadCSV() {
     if (response.ok) {
       if (result.processInBackground) {
         addLog(`✅ CSV added to queue: ${result.message}`, "success");
-        addLog(`📋 Task ID: ${result.taskId}, Queue length: ${result.queueStatus.queueLength}`, "info");
+        addLog(
+          `📋 Task ID: ${result.taskId}, Queue length: ${result.queueStatus.queueLength}`,
+          "info"
+        );
         refreshCsvQueue(); // Refresh the queue display
       } else {
         addLog(`✅ CSV uploaded successfully: ${result.message}`, "success");
@@ -208,7 +257,7 @@ async function uploadCSV() {
         );
       }
       refreshSystemStatus();
-      
+
       // Clear file selection
       fileInput.value = "";
       document.getElementById("file-info").style.display = "none";
@@ -256,9 +305,17 @@ async function performSearch() {
   const limit = parseInt(document.getElementById("search-limit").value);
   const method = document.getElementById("search-method").value;
 
-  if (!query) {
-    addLog("❌ Please enter a search query", "warning");
-    return;
+  // If query is empty or just started typing (less than 2 characters), show latest data
+  if (!query || query.length < 2) {
+    if (!query) {
+      addLog("❌ Please enter a search query", "warning");
+      return;
+    } else {
+      // Show latest data for short queries
+      addLog("📅 Showing latest data while you type...", "info");
+      await showLatestData(limit);
+      return;
+    }
   }
 
   // Build filters
@@ -310,6 +367,46 @@ async function performSearch() {
     }
   } catch (error) {
     addLog(`❌ Search error: ${error.message}`, "error");
+  }
+}
+
+async function showLatestData(limit = 10) {
+  try {
+    // Build filters
+    const filters = {};
+    const stateFilter = document.getElementById("filter-state").value.trim();
+    const categoryFilter = document
+      .getElementById("filter-category")
+      .value.trim();
+
+    if (stateFilter) filters.StateName = stateFilter;
+    if (categoryFilter) filters.Category = categoryFilter;
+
+    const startTime = Date.now();
+    
+    // Build query string
+    let queryString = `limit=${limit}`;
+    if (Object.keys(filters).length > 0) {
+      queryString += '&filters=' + encodeURIComponent(JSON.stringify(filters));
+    }
+
+    const response = await fetch(`/api/latest-data?${queryString}`);
+    const result = await response.json();
+    const fetchTime = Date.now() - startTime;
+
+    if (response.ok) {
+      // Display results with a special indicator that these are latest documents
+      displaySearchResults(result.results, "Latest Data", fetchTime, true);
+      updateLastSearchTime(fetchTime);
+      addLog(
+        `📅 Latest data fetched in ${fetchTime}ms - Found ${result.results.length} newest documents`,
+        "success"
+      );
+    } else {
+      addLog(`❌ Failed to fetch latest data: ${result.error}`, "error");
+    }
+  } catch (error) {
+    addLog(`❌ Latest data error: ${error.message}`, "error");
   }
 }
 
@@ -373,7 +470,7 @@ function updateLastSearchTime(time) {
   document.getElementById("last-search-time").textContent = time + "ms";
 }
 
-function displaySearchResults(results, query, searchTime) {
+function displaySearchResults(results, query, searchTime, isLatestData = false) {
   const resultsContainer = document.getElementById("search-results");
   const resultsCount = document.getElementById("results-count");
 
@@ -383,8 +480,8 @@ function displaySearchResults(results, query, searchTime) {
     resultsContainer.innerHTML = `
             <div class="text-center text-muted p-4">
                 <i class="fas fa-search fa-3x mb-3"></i>
-                <p>No results found for "${query}"</p>
-                <small>Try different keywords or check your filters</small>
+                <p>No results found${isLatestData ? " in latest data" : ` for "${query}"`}</p>
+                <small>${isLatestData ? "Try removing filters or upload more data" : "Try different keywords or check your filters"}</small>
             </div>
         `;
     return;
@@ -392,16 +489,30 @@ function displaySearchResults(results, query, searchTime) {
 
   let html = "";
   results.forEach((result, index) => {
+    // Handle both similarity and latest data display
     const similarity = result.similarity
       ? (result.similarity * 100).toFixed(1)
+      : null;
+    
+    // Format date for latest data
+    const createdDate = result.CreatedOn 
+      ? new Date(result.CreatedOn).toLocaleDateString()
       : "N/A";
+    
+    // Different styling for latest data vs search results
+    const cardClass = isLatestData ? "search-result latest-data-item" : "search-result";
+    const headerText = isLatestData 
+      ? `${index + 1}. ${result.Category || "General"} (${createdDate})`
+      : `${index + 1}. ${result.Category || "General"}`;
+    
     html += `
-            <div class="search-result">
+            <div class="${cardClass}">
                 <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6 class="mb-0">${index + 1}. ${
-      result.Category || "General"
-    }</h6>
-                    <span class="similarity-score">${similarity}%</span>
+                    <h6 class="mb-0">${headerText}</h6>
+                    ${isLatestData 
+                      ? `<span class="badge bg-success">Latest</span>`
+                      : `<span class="similarity-score">${similarity}%</span>`
+                    }
                 </div>
                 <div class="row">
                     <div class="col-md-6">
@@ -429,6 +540,12 @@ function displaySearchResults(results, query, searchTime) {
                       200
                     )}</p>
                 </div>
+                ${isLatestData ? `
+                <div class="mt-2">
+                    <small class="text-muted">Added:</small>
+                    <p class="mb-0 text-success">${createdDate}</p>
+                </div>
+                ` : ''}
             </div>
         `;
   });
@@ -961,19 +1078,25 @@ function updateCsvQueueStatus(queueStatus) {
   if (queueStatus.currentTask) {
     const task = queueStatus.currentTask;
     currentTaskElement.style.display = "block";
-    
+
     document.getElementById("csv-current-file").textContent = task.fileName;
     document.getElementById("csv-current-status").textContent = task.status;
-    document.getElementById("csv-current-progress").textContent = `${task.progress.toFixed(1)}%`;
-    document.getElementById("csv-current-processed").textContent = task.processedRecords;
-    document.getElementById("csv-current-inserted").textContent = task.insertedRecords;
-    document.getElementById("csv-current-failed").textContent = task.failedRecords;
-    
+    document.getElementById(
+      "csv-current-progress"
+    ).textContent = `${task.progress.toFixed(1)}%`;
+    document.getElementById("csv-current-processed").textContent =
+      task.processedRecords;
+    document.getElementById("csv-current-inserted").textContent =
+      task.insertedRecords;
+    document.getElementById("csv-current-failed").textContent =
+      task.failedRecords;
+
     const progressBar = document.getElementById("csv-current-progress-bar");
     progressBar.style.width = `${task.progress}%`;
-    
+
     if (task.status === "processing") {
-      progressBar.className = "progress-bar progress-bar-striped progress-bar-animated bg-primary";
+      progressBar.className =
+        "progress-bar progress-bar-striped progress-bar-animated bg-primary";
     } else if (task.status === "completed") {
       progressBar.className = "progress-bar bg-success";
     } else if (task.status === "failed") {
@@ -1005,11 +1128,11 @@ function updateCsvQueueList(queue) {
   }
 
   let html = `<h6>Queue (${queue.length} files)</h6>`;
-  
+
   queue.forEach((task, index) => {
     const statusClass = getTaskStatusClass(task.status);
     const createdAt = new Date(task.createdAt).toLocaleString();
-    
+
     html += `
       <div class="card card-body mb-2">
         <div class="d-flex justify-content-between align-items-start">
@@ -1025,27 +1148,33 @@ function updateCsvQueueList(queue) {
             <small>Progress: ${task.progress.toFixed(1)}%</small>
           </div>
           <div class="col-md-6">
-            <small>Records: ${task.processedRecords}/${task.totalRecords}</small><br>
+            <small>Records: ${task.processedRecords}/${
+      task.totalRecords
+    }</small><br>
             <small>Inserted: ${task.insertedRecords}</small>
           </div>
         </div>
-        ${task.error ? `<div class="text-danger mt-2"><small>Error: ${task.error}</small></div>` : ''}
+        ${
+          task.error
+            ? `<div class="text-danger mt-2"><small>Error: ${task.error}</small></div>`
+            : ""
+        }
       </div>
     `;
   });
-  
+
   queueListElement.innerHTML = html;
 }
 
 // Get CSS class for task status
 function getTaskStatusClass(status) {
   const classes = {
-    'queued': 'bg-secondary',
-    'processing': 'bg-primary',
-    'completed': 'bg-success',
-    'failed': 'bg-danger'
+    queued: "bg-secondary",
+    processing: "bg-primary",
+    completed: "bg-success",
+    failed: "bg-danger",
   };
-  return classes[status] || 'bg-secondary';
+  return classes[status] || "bg-secondary";
 }
 
 // Start CSV queue processing
@@ -1094,7 +1223,11 @@ async function stopCsvQueue() {
 
 // Clear CSV queue
 async function clearCsvQueue() {
-  if (!confirm("Are you sure you want to clear the CSV queue? This will remove all pending tasks.")) {
+  if (
+    !confirm(
+      "Are you sure you want to clear the CSV queue? This will remove all pending tasks."
+    )
+  ) {
     return;
   }
 

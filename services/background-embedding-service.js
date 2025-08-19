@@ -40,7 +40,7 @@ class BackgroundEmbeddingService {
     this.concurrentWorkers = 1; // Number of concurrent processing workers
     this.activeWorkers = 0;
     this.skipExisting = true; // Skip documents that already have embeddings
-    
+
     // CSV Processing Queue
     this.csvQueue = [];
     this.csvProcessingActive = false;
@@ -835,12 +835,16 @@ class BackgroundEmbeddingService {
         clearExisting: options.clearExisting || false,
         generateEmbeddings: options.generateEmbeddings || true,
         batchSize: options.batchSize || 1000,
-        ...options
-      }
+        ...options,
+      },
     };
 
     this.csvQueue.push(csvTask);
-    this.addLog("info", `📄 CSV file added to queue: ${fileName}`, { taskId, fileName, queueLength: this.csvQueue.length });
+    this.addLog("info", `📄 CSV file added to queue: ${fileName}`, {
+      taskId,
+      fileName,
+      queueLength: this.csvQueue.length,
+    });
 
     // Start processing if not already active
     if (!this.csvProcessingActive) {
@@ -858,7 +862,7 @@ class BackgroundEmbeddingService {
       active: this.csvProcessingActive,
       queueLength: this.csvQueue.length,
       currentTask: this.currentCsvTask,
-      queue: this.csvQueue.map(task => ({
+      queue: this.csvQueue.map((task) => ({
         id: task.id,
         fileName: task.fileName,
         status: task.status,
@@ -870,8 +874,8 @@ class BackgroundEmbeddingService {
         processedRecords: task.processedRecords,
         insertedRecords: task.insertedRecords,
         failedRecords: task.failedRecords,
-        error: task.error
-      }))
+        error: task.error,
+      })),
     };
   }
 
@@ -889,15 +893,19 @@ class BackgroundEmbeddingService {
     while (this.csvQueue.length > 0 && this.csvProcessingActive) {
       const task = this.csvQueue.shift();
       this.currentCsvTask = task;
-      
+
       try {
         await this.processCsvFile(task);
       } catch (error) {
-        this.addLog("error", `Failed to process CSV task ${task.id}`, error.message);
+        this.addLog(
+          "error",
+          `Failed to process CSV task ${task.id}`,
+          error.message
+        );
         task.status = "failed";
         task.error = error.message;
         task.completedAt = new Date();
-        
+
         if (this.onCsvErrorCallback) {
           this.onCsvErrorCallback(error, task);
         }
@@ -919,12 +927,16 @@ class BackgroundEmbeddingService {
 
     task.status = "processing";
     task.startedAt = new Date();
-    
-    this.addLog("info", `📄 Processing CSV file: ${task.fileName}`, { taskId: task.id });
+
+    this.addLog("info", `📄 Processing CSV file: ${task.fileName}`, {
+      taskId: task.id,
+    });
 
     // Clear existing documents if requested
     if (task.options.clearExisting) {
-      this.addLog("info", "🗑️ Clearing existing documents...", { taskId: task.id });
+      this.addLog("info", "🗑️ Clearing existing documents...", {
+        taskId: task.id,
+      });
       await Document.deleteMany({});
     }
 
@@ -983,7 +995,10 @@ class BackgroundEmbeddingService {
 
           // Process in batches
           if (records.length >= task.options.batchSize) {
-            this.processRecordBatch(records.splice(0, task.options.batchSize), task)
+            this.processRecordBatch(
+              records.splice(0, task.options.batchSize),
+              task
+            )
               .then((count) => {
                 task.insertedRecords += count;
                 task.processedRecords += task.options.batchSize;
@@ -1019,9 +1034,17 @@ class BackgroundEmbeddingService {
 
             // Start embedding generation if requested
             if (task.options.generateEmbeddings && !this.isRunning) {
-              this.addLog("info", "🧠 Starting embedding generation for new documents...", { taskId: task.id });
-              this.start().catch(error => {
-                this.addLog("error", "Failed to start embedding generation", error.message);
+              this.addLog(
+                "info",
+                "🧠 Starting embedding generation for new documents...",
+                { taskId: task.id }
+              );
+              this.start().catch((error) => {
+                this.addLog(
+                  "error",
+                  "Failed to start embedding generation",
+                  error.message
+                );
               });
             }
 
@@ -1034,7 +1057,7 @@ class BackgroundEmbeddingService {
             task.status = "failed";
             task.error = error.message;
             task.completedAt = new Date();
-            
+
             this.addLog("error", "CSV processing error", error.message);
             reject(error);
           }
@@ -1043,7 +1066,7 @@ class BackgroundEmbeddingService {
           task.status = "failed";
           task.error = error.message;
           task.completedAt = new Date();
-          
+
           this.addLog("error", "CSV parsing error", error.message);
           reject(error);
         });
@@ -1059,7 +1082,11 @@ class BackgroundEmbeddingService {
       const result = await Document.insertMany(records, { ordered: false });
       return result.length;
     } catch (error) {
-      this.addLog("warning", `Batch insert error for task ${task.id}`, error.message);
+      this.addLog(
+        "warning",
+        `Batch insert error for task ${task.id}`,
+        error.message
+      );
       task.failedRecords += records.length;
       return 0;
     }
@@ -1070,7 +1097,10 @@ class BackgroundEmbeddingService {
    */
   updateCsvProgress(task) {
     if (task.totalRecords > 0) {
-      task.progress = Math.min(100, (task.processedRecords / task.totalRecords) * 100);
+      task.progress = Math.min(
+        100,
+        (task.processedRecords / task.totalRecords) * 100
+      );
     }
 
     if (this.onCsvProgressCallback) {

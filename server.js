@@ -110,6 +110,7 @@ app.get("/", (req, res) => {
       uploadCSV: "POST /api/upload-csv",
       search: "POST /api/search",
       searchFallback: "POST /api/search-fallback",
+      latestData: "GET /api/latest-data",
       generateEmbeddings: "POST /api/generate-embeddings",
       backgroundEmbeddings: {
         start: "POST /api/background-embeddings/start",
@@ -147,7 +148,7 @@ app.get("/api/status", async (req, res) => {
     // Get background embedding service status
     let backgroundStatus = null;
     let csvQueueStatus = null;
-    
+
     if (backgroundEmbeddingService) {
       backgroundStatus = backgroundEmbeddingService.getStatus();
       csvQueueStatus = backgroundEmbeddingService.getCsvQueueStatus();
@@ -200,11 +201,15 @@ app.post("/api/upload-csv", upload.single("csvFile"), async (req, res) => {
 
     if (processInBackground && backgroundEmbeddingService) {
       // Add to background processing queue
-      const csvTask = backgroundEmbeddingService.addCsvToQueue(filePath, fileName, {
-        clearExisting,
-        generateEmbeddings,
-        batchSize: parseInt(req.body.batchSize) || 1000
-      });
+      const csvTask = backgroundEmbeddingService.addCsvToQueue(
+        filePath,
+        fileName,
+        {
+          clearExisting,
+          generateEmbeddings,
+          batchSize: parseInt(req.body.batchSize) || 1000,
+        }
+      );
 
       return res.json({
         success: true,
@@ -212,7 +217,7 @@ app.post("/api/upload-csv", upload.single("csvFile"), async (req, res) => {
         taskId: csvTask.id,
         fileName: fileName,
         processInBackground: true,
-        queueStatus: backgroundEmbeddingService.getCsvQueueStatus()
+        queueStatus: backgroundEmbeddingService.getCsvQueueStatus(),
       });
     } else {
       // Process immediately (legacy behavior)
@@ -308,7 +313,7 @@ app.post("/api/upload-csv", upload.single("csvFile"), async (req, res) => {
                 message: "CSV uploaded and processed successfully",
                 totalProcessed: totalProcessed - 1, // Subtract header row
                 totalInserted: totalInserted,
-                processInBackground: false
+                processInBackground: false,
               });
 
               resolve();
@@ -453,6 +458,77 @@ app.post("/api/search-fallback", async (req, res) => {
     console.error("❌ Fallback search error:", error);
     res.status(500).json({
       error: "Fallback search failed",
+      message: error.message,
+    });
+  }
+});
+
+/**
+ * Get latest/newest documents endpoint
+ */
+app.get("/api/latest-data", async (req, res) => {
+  try {
+    const { limit = 10, filters = {} } = req.query;
+    
+    console.log(`📅 Fetching latest ${limit} documents`);
+
+    // Build the MongoDB filter
+    const mongoFilter = {};
+    
+    // Add optional filters
+    if (filters.StateName) {
+      mongoFilter.StateName = new RegExp(filters.StateName, "i");
+    }
+    if (filters.Category) {
+      mongoFilter.Category = new RegExp(filters.Category, "i");
+    }
+
+    const startTime = Date.now();
+    
+    // Get the latest documents sorted by CreatedOn (newest first)
+    const latestDocuments = await Document.find(mongoFilter, {
+      _id: 1,
+      StateName: 1,
+      DistrictName: 1,
+      Category: 1,
+      QueryType: 1,
+      QueryText: 1,
+      KccAns: 1,
+      Crop: 1,
+      Season: 1,
+      CreatedOn: 1,
+    })
+    .sort({ CreatedOn: -1 }) // Sort by newest first
+    .limit(parseInt(limit))
+    .lean();
+    
+    const fetchTime = Date.now() - startTime;
+    
+    console.log(`✅ Fetched ${latestDocuments.length} latest documents in ${fetchTime}ms`);
+
+    res.json({
+      success: true,
+      message: "Latest data fetched successfully",
+      totalFound: latestDocuments.length,
+      fetchTime: `${fetchTime}ms`,
+      results: latestDocuments.map((doc) => ({
+        id: doc._id,
+        StateName: doc.StateName,
+        DistrictName: doc.DistrictName,
+        Category: doc.Category,
+        QueryType: doc.QueryType,
+        QueryText: doc.QueryText,
+        KccAns: doc.KccAns,
+        Crop: doc.Crop,
+        Season: doc.Season,
+        CreatedOn: doc.CreatedOn,
+        isLatest: true, // Flag to indicate this is latest data
+      })),
+    });
+  } catch (error) {
+    console.error("❌ Latest data fetch error:", error);
+    res.status(500).json({
+      error: "Failed to fetch latest data",
       message: error.message,
     });
   }
@@ -918,6 +994,7 @@ app.use((req, res) => {
       "POST /api/upload-csv",
       "POST /api/search",
       "POST /api/search-fallback",
+      "GET /api/latest-data",
       "POST /api/generate-embeddings",
       "POST /api/background-embeddings/start",
       "POST /api/background-embeddings/pause",
@@ -963,16 +1040,23 @@ app.listen(PORT, async () => {
     // CSV processing callbacks
     backgroundEmbeddingService.onCsvProgress((task) => {
       console.log(
-        `📄 CSV Progress: ${task.fileName} - ${task.progress.toFixed(1)}% (${task.processedRecords}/${task.totalRecords})`
+        `📄 CSV Progress: ${task.fileName} - ${task.progress.toFixed(1)}% (${
+          task.processedRecords
+        }/${task.totalRecords})`
       );
     });
 
     backgroundEmbeddingService.onCsvComplete((task) => {
-      console.log(`✅ CSV Processing completed: ${task.fileName} - ${task.insertedRecords} documents inserted`);
+      console.log(
+        `✅ CSV Processing completed: ${task.fileName} - ${task.insertedRecords} documents inserted`
+      );
     });
 
     backgroundEmbeddingService.onCsvError((error, task) => {
-      console.error(`❌ CSV Processing error for ${task.fileName}:`, error.message);
+      console.error(
+        `❌ CSV Processing error for ${task.fileName}:`,
+        error.message
+      );
     });
   }
 

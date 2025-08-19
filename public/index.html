@@ -124,7 +124,8 @@
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="generate-embeddings" checked>
+                                        <input class="form-check-input" type="checkbox" id="generate-embeddings"
+                                            checked>
                                         <label class="form-check-label" for="generate-embeddings">
                                             Auto-generate embeddings
                                         </label>
@@ -189,17 +190,22 @@
                                                 <div class="row">
                                                     <div class="col-md-8">
                                                         <strong>File:</strong> <span id="csv-current-file">-</span><br>
-                                                        <strong>Status:</strong> <span id="csv-current-status">-</span><br>
-                                                        <strong>Progress:</strong> <span id="csv-current-progress">0%</span>
+                                                        <strong>Status:</strong> <span
+                                                            id="csv-current-status">-</span><br>
+                                                        <strong>Progress:</strong> <span
+                                                            id="csv-current-progress">0%</span>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <small>Processed: <span id="csv-current-processed">0</span></small><br>
-                                                        <small>Inserted: <span id="csv-current-inserted">0</span></small><br>
+                                                        <small>Processed: <span
+                                                                id="csv-current-processed">0</span></small><br>
+                                                        <small>Inserted: <span
+                                                                id="csv-current-inserted">0</span></small><br>
                                                         <small>Failed: <span id="csv-current-failed">0</span></small>
                                                     </div>
                                                 </div>
                                                 <div class="progress mt-2" style="height: 10px;">
-                                                    <div class="progress-bar" id="csv-current-progress-bar" role="progressbar" style="width: 0%"></div>
+                                                    <div class="progress-bar" id="csv-current-progress-bar"
+                                                        role="progressbar" style="width: 0%"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -389,6 +395,9 @@
                                             placeholder="Enter your search query (e.g., 'Government Schemes', 'crop disease management')">
                                         <button class="btn btn-primary" id="search-btn">
                                             <i class="fas fa-search"></i> Search
+                                        </button>
+                                        <button class="btn btn-success" id="show-latest-btn" title="Show Latest Data">
+                                            <i class="fas fa-clock"></i> Latest
                                         </button>
                                     </div>
                                 </div>
